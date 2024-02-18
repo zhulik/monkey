@@ -9,7 +9,7 @@ import (
 
 var _ = Describe("Lexer", func() {
 	Describe(".Tokens", func() {
-		Context("when lexing simple tokens", func() {
+		Context("when all tokens are correct", func() {
 			input := `=+(){},;
 let five = 5;
 let ten = 10;
@@ -140,6 +140,16 @@ if (5 < 10) {
 				tokens, err := lex.Tokens()
 				Expect(err).ToNot(HaveOccurred())
 				Expect(tokens).To(Equal(result))
+			})
+		})
+
+		Context("when there is an illegal character", func() {
+			input := "$#"
+			lex := lexer.New(input)
+
+			It("returns an error", func() {
+				_, err := lex.Tokens()
+				Expect(err).To(MatchError(lexer.ErrIllegalCharacter))
 			})
 		})
 	})
