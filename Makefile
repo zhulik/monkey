@@ -3,11 +3,17 @@ ifeq (,$(findstring j,$(MAKEFLAGS)))
 endif
 
 
-.PHONY: test lint
+export GOEXPERIMENT=rangefunc
+
+
+.PHONY: test lint repl
 
 GOLANGCI_LINT_VERSION := $(shell cat .golangci-lint-version)
 
 default: test lint
+
+repl:
+	go run ./cmd/monkey/main.go
 
 test:
 	ginkgo -p -r

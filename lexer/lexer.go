@@ -95,6 +95,19 @@ func (l *Lexer) NextToken() tokens.Token { //nolint:cyclop,funlen
 	return tok
 }
 
+func (l *Lexer) IterateTokens() func(func(int, tokens.Token) bool) {
+	return func(yield func(int, tokens.Token) bool) {
+		i := 0
+		for token := l.NextToken(); token.Type != tokens.EOF; token = l.NextToken() {
+			if !yield(i, token) {
+				return
+			}
+
+			i++
+		}
+	}
+}
+
 func (l *Lexer) identifierToken() tokens.Token {
 	literal := l.readIdentifier()
 

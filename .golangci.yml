@@ -30,14 +30,10 @@ linters-settings:
     check-shadowing: true
     settings:
       shadow:
-          strict: true
+        strict: true
   varnamelen:
     ignore-decls:
-      - db *Database
-      - r *chi.Mux
-      - r chi.Router
-      - w http.ResponseWriter
-
+      - i int
 issues:
   max-same-issues: 0
 
@@ -47,6 +43,6 @@ issues:
         - revive
         - wrapcheck
 
-    - path: pacstash/cmd/.+\.go 
+    - path: pacstash/cmd/.+\.go
       linters:
-        - gochecknoglobals      
+        - gochecknoglobals
