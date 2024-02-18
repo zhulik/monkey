@@ -1,6 +1,8 @@
 package lexer_test
 
 import (
+	"io"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/zhulik/monkey/lexer"
@@ -8,6 +10,34 @@ import (
 )
 
 var _ = Describe("Lexer", func() {
+	Describe(".NextToken", func() {
+		input := `;`
+
+		Context("when there is a next token", func() {
+			It("returns the next token", func() {
+				lex := lexer.New(input)
+				token, err := lex.NextToken()
+				Expect(err).ToNot(HaveOccurred())
+				Expect(token).To(Equal(tokens.New(tokens.SEMICOLON)))
+			})
+		})
+
+		Context("when lexer is at the end of input", func() {
+			It("returns io.EOF", func() {
+				lex := lexer.New(input)
+
+				token, err := lex.NextToken()
+				Expect(err).ToNot(HaveOccurred())
+				Expect(token).To(Equal(tokens.New(tokens.SEMICOLON)))
+
+				_, err = lex.NextToken()
+				Expect(err).To(MatchError(io.EOF))
+
+				_, err = lex.NextToken()
+				Expect(err).To(MatchError(io.EOF))
+			})
+		})
+	})
 	Describe(".Tokens", func() {
 		Context("when all tokens are correct", func() {
 			input := `=+(){},;
@@ -144,12 +174,21 @@ if (5 < 10) {
 		})
 
 		Context("when there is an illegal character", func() {
-			input := "$#"
-			lex := lexer.New(input)
+			lex := lexer.New("$#")
 
 			It("returns an error", func() {
 				_, err := lex.Tokens()
 				Expect(err).To(MatchError(lexer.ErrIllegalCharacter))
+			})
+		})
+
+		Context("when parsing an empty string", func() {
+			lex := lexer.New("")
+
+			It("returns an empty array", func() {
+				tokens, err := lex.Tokens()
+				Expect(tokens).To(BeEmpty())
+				Expect(err).ToNot(HaveOccurred())
 			})
 		})
 	})

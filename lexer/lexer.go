@@ -25,6 +25,10 @@ func New(input string) *Lexer {
 }
 
 func (l *Lexer) NextToken() (tokens.Token, error) { //nolint:cyclop,funlen
+	if l.position >= len(l.input) {
+		return tokens.Token{}, io.EOF
+	}
+
 	l.skipWhitespaces()
 
 	var tok tokens.Token
