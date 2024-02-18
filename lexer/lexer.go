@@ -41,9 +41,21 @@ func (l *Lexer) NextToken() tokens.Token { //nolint:cyclop,funlen
 	case '*':
 		tok = tokens.New(tokens.ASTERISK)
 	case '<':
-		tok = tokens.New(tokens.LT)
+		if l.peekChar() == '=' {
+			l.readChar()
+
+			tok = tokens.New(tokens.LTE)
+		} else {
+			tok = tokens.New(tokens.LT)
+		}
 	case '>':
-		tok = tokens.New(tokens.GT)
+		if l.peekChar() == '=' {
+			l.readChar()
+
+			tok = tokens.New(tokens.GTE)
+		} else {
+			tok = tokens.New(tokens.GT)
+		}
 	case '(':
 		tok = tokens.New(tokens.LPAREN)
 	case ')':

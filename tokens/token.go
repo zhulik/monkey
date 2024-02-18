@@ -16,8 +16,10 @@ const (
 	ASTERISK TokenType = "*"
 	SLASH    TokenType = "/"
 
-	GT TokenType = ">"
-	LT TokenType = "<"
+	GT  TokenType = ">"
+	LT  TokenType = "<"
+	GTE TokenType = ">="
+	LTE TokenType = "<="
 
 	EQ  TokenType = "=="
 	NEQ TokenType = "!="
