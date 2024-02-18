@@ -5,6 +5,7 @@ go 1.22.0
 require (
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/k0kubun/pp v3.0.1+incompatible
+	github.com/k0kubun/pp/v3 v3.2.0
 	github.com/onsi/ginkgo/v2 v2.15.0
 	github.com/onsi/gomega v1.31.1
 	github.com/urfave/cli/v2 v2.27.1

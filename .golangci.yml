@@ -20,6 +20,9 @@ linters:
     - godox
     - depguard
 
+    # Broken
+    - ireturn
+
 linters-settings:
   errcheck:
     check-blank: true
@@ -34,6 +37,7 @@ linters-settings:
   varnamelen:
     ignore-decls:
       - i int
+      - ok bool
 issues:
   max-same-issues: 0
 
