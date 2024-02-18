@@ -8,7 +8,6 @@ import (
 	"github.com/chzyer/readline"
 	"github.com/k0kubun/pp"
 	"github.com/zhulik/monkey/lexer"
-	"github.com/zhulik/monkey/tokens"
 )
 
 func Start() error {
@@ -37,7 +36,7 @@ func Start() error {
 		// 	fmt.Printf("%+v\n", token)
 		// }
 
-		for token, lErr := lex.NextToken(); token.Type != tokens.EOF; token, lErr = lex.NextToken() {
+		for token, lErr := lex.NextToken(); !errors.Is(lErr, io.EOF); token, lErr = lex.NextToken() {
 			if lErr != nil {
 				pp.Print("Lexing error: %w", lErr)
 

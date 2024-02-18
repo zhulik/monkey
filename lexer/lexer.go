@@ -3,6 +3,7 @@ package lexer
 import (
 	"errors"
 	"fmt"
+	"io"
 
 	"github.com/zhulik/monkey/tokens"
 )
@@ -83,7 +84,9 @@ func (l *Lexer) NextToken() (tokens.Token, error) { //nolint:cyclop,funlen
 		}
 
 	case 0:
-		tok = tokens.New(tokens.EOF)
+		defer l.readChar()
+
+		return tokens.Token{}, io.EOF
 	default:
 		switch {
 		case isLetter(l.ch):
@@ -105,7 +108,7 @@ func (l *Lexer) NextToken() (tokens.Token, error) { //nolint:cyclop,funlen
 func (l *Lexer) Tokens() ([]tokens.Token, error) {
 	tkns := []tokens.Token{}
 
-	for token, err := l.NextToken(); token.Type != tokens.EOF; token, err = l.NextToken() {
+	for token, err := l.NextToken(); !errors.Is(err, io.EOF); token, err = l.NextToken() {
 		if err != nil {
 			return []tokens.Token{}, err
 		}
