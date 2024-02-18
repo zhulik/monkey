@@ -10,7 +10,27 @@ import (
 var _ = Describe("Lexer", func() {
 	Describe(".NextToken", func() {
 		Context("when lexing simple tokens", func() {
-			input := "=+(){},;"
+			input := `=+(){},;
+let five = 5;
+let ten = 10;
+
+let add = fn(x, y) {
+	x + y;
+};
+
+let result = add(five, ten);
+
+!-/*5;
+5 < 10 > 5;
+if (5 < 10) {
+  return true;
+} else {
+  return false;
+}
+10 == 10;
+10 != 9;
+10 >= 10;
+9 <= 10;`
 			lex := lexer.New(input)
 
 			tests := []tokens.Token{
@@ -22,31 +42,7 @@ var _ = Describe("Lexer", func() {
 				tokens.New(tokens.RBRACE),
 				tokens.New(tokens.COMMA),
 				tokens.New(tokens.SEMICOLON),
-				tokens.New(tokens.EOF),
-			}
 
-			It("returns the next token", func() {
-				for _, testCase := range tests {
-					token, err := lex.NextToken()
-					Expect(err).ToNot(HaveOccurred())
-					Expect(token).To(Equal(testCase))
-				}
-			})
-		})
-
-		Context("when lexing more complicated tokens", func() {
-			input := `let five = 5;
-let ten = 10;
-
-let add = fn(x, y) {
-	x + y;
-};
-
-let result = add(five, ten);`
-
-			lex := lexer.New(input)
-
-			tests := []tokens.Token{
 				tokens.New(tokens.LET),
 				tokens.New(tokens.IDENTIFIER, "five"),
 				tokens.New(tokens.ASSIGN),
@@ -86,25 +82,7 @@ let result = add(five, ten);`
 				tokens.New(tokens.IDENTIFIER, "ten"),
 				tokens.New(tokens.RPAREN),
 				tokens.New(tokens.SEMICOLON),
-				tokens.New(tokens.EOF),
-			}
 
-			It("returns the next token", func() {
-				for _, testCase := range tests {
-					token, err := lex.NextToken()
-					Expect(err).ToNot(HaveOccurred())
-					Expect(token).To(Equal(testCase))
-				}
-			})
-		})
-
-		Context("when lexing some other tokens", func() {
-			input := `!-/*5;
-5 < 10 > 5;`
-
-			lex := lexer.New(input)
-
-			tests := []tokens.Token{
 				tokens.New(tokens.BANG),
 				tokens.New(tokens.MINUS),
 				tokens.New(tokens.SLASH),
@@ -118,28 +96,7 @@ let result = add(five, ten);`
 				tokens.New(tokens.GT),
 				tokens.New(tokens.INTEGER, "5"),
 				tokens.New(tokens.SEMICOLON),
-				tokens.New(tokens.EOF),
-			}
 
-			It("returns the next token", func() {
-				for _, testCase := range tests {
-					token, err := lex.NextToken()
-					Expect(err).ToNot(HaveOccurred())
-					Expect(token).To(Equal(testCase))
-				}
-			})
-		})
-
-		Context("when lexing some other tokens", func() {
-			input := `if (5 < 10) {
-  return true;
-} else {
-  return false;
-}`
-
-			lex := lexer.New(input)
-
-			tests := []tokens.Token{
 				tokens.New(tokens.IF),
 				tokens.New(tokens.LPAREN),
 				tokens.New(tokens.INTEGER, "5"),
@@ -157,25 +114,7 @@ let result = add(five, ten);`
 				tokens.New(tokens.FALSE),
 				tokens.New(tokens.SEMICOLON),
 				tokens.New(tokens.RBRACE),
-				tokens.New(tokens.EOF),
-			}
 
-			It("returns the next token", func() {
-				for _, testCase := range tests {
-					token, err := lex.NextToken()
-					Expect(err).ToNot(HaveOccurred())
-					Expect(token).To(Equal(testCase))
-				}
-			})
-		})
-
-		Context("when lexing some other tokens", func() {
-			input := `10 == 10;
-10 != 9;`
-
-			lex := lexer.New(input)
-
-			tests := []tokens.Token{
 				tokens.New(tokens.INTEGER, "10"),
 				tokens.New(tokens.EQ),
 				tokens.New(tokens.INTEGER, "10"),
@@ -186,25 +125,6 @@ let result = add(five, ten);`
 				tokens.New(tokens.INTEGER, "9"),
 				tokens.New(tokens.SEMICOLON),
 
-				tokens.New(tokens.EOF),
-			}
-
-			It("returns the next token", func() {
-				for _, testCase := range tests {
-					token, err := lex.NextToken()
-					Expect(err).ToNot(HaveOccurred())
-					Expect(token).To(Equal(testCase))
-				}
-			})
-		})
-
-		Context("when lexing some other tokens", func() {
-			input := `10 >= 10;
-9 <= 10;`
-
-			lex := lexer.New(input)
-
-			tests := []tokens.Token{
 				tokens.New(tokens.INTEGER, "10"),
 				tokens.New(tokens.GTE),
 				tokens.New(tokens.INTEGER, "10"),
