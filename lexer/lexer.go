@@ -96,7 +96,7 @@ func (l *Lexer) NextToken() (tokens.Token, error) { //nolint:cyclop,funlen
 		case isLetter(l.ch):
 			return l.identifierToken(), nil
 		case isDigit(l.ch):
-			return l.numberToken(), nil
+			return tokens.New(tokens.INTEGER, l.readNumber()), nil
 		default:
 			defer l.readChar()
 
@@ -126,23 +126,14 @@ func (l *Lexer) Tokens() ([]tokens.Token, error) {
 func (l *Lexer) identifierToken() tokens.Token {
 	literal := l.readIdentifier()
 
-	var token tokens.Token
+	tokenType := tokens.TypeFromLiteral(literal)
+	tokenLiteral := ""
 
-	token.Type = tokens.TypeFromLiteral(literal)
-	if token.Type == tokens.IDENTIFIER {
-		token.Literal = literal
+	if tokenType == tokens.IDENTIFIER {
+		tokenLiteral = literal
 	}
 
-	return token
-}
-
-func (l *Lexer) numberToken() tokens.Token {
-	var token tokens.Token
-
-	token.Literal = l.readNumber()
-	token.Type = tokens.INTEGER
-
-	return token
+	return tokens.New(tokenType, tokenLiteral)
 }
 
 func (l *Lexer) readChar() {
