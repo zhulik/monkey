@@ -1,0 +1,52 @@
+run:
+  modules-download-mode: readonly
+linters:
+  enable-all: true
+  disable:
+    # Deprecated
+    - exhaustivestruct
+    - golint
+    - deadcode
+    - nosnakecase
+    - interfacer
+    - structcheck
+    - varcheck
+    - ifshort
+    - scopelint
+    - maligned
+
+    # Purposely disabled
+    - exhaustruct
+    - godox
+    - depguard
+
+linters-settings:
+  errcheck:
+    check-blank: true
+  whitespace:
+    multi-if: false
+    multi-func: false
+  govet:
+    check-shadowing: true
+    settings:
+      shadow:
+          strict: true
+  varnamelen:
+    ignore-decls:
+      - db *Database
+      - r *chi.Mux
+      - r chi.Router
+      - w http.ResponseWriter
+
+issues:
+  max-same-issues: 0
+
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - revive
+        - wrapcheck
+
+    - path: pacstash/cmd/.+\.go 
+      linters:
+        - gochecknoglobals      
