@@ -123,5 +123,42 @@ let result = add(five, ten);`
 				}
 			})
 		})
+
+		Context("when lexing some other tokens", func() {
+			input := `if (5 < 10) {
+  return true;
+} else {
+  return false;
+}`
+
+			lex := lexer.New(input)
+
+			tests := []tokens.Token{
+				tokens.New(tokens.IF),
+				tokens.New(tokens.LPAREN),
+				tokens.New(tokens.INTEGER, "5"),
+				tokens.New(tokens.LT),
+				tokens.New(tokens.INTEGER, "10"),
+				tokens.New(tokens.RPAREN),
+				tokens.New(tokens.LBRACE),
+				tokens.New(tokens.RETURN),
+				tokens.New(tokens.TRUE),
+				tokens.New(tokens.SEMICOLON),
+				tokens.New(tokens.RBRACE),
+				tokens.New(tokens.ELSE),
+				tokens.New(tokens.LBRACE),
+				tokens.New(tokens.RETURN),
+				tokens.New(tokens.FALSE),
+				tokens.New(tokens.SEMICOLON),
+				tokens.New(tokens.RBRACE),
+				tokens.New(tokens.EOF),
+			}
+
+			It("returns the next token", func() {
+				for _, testCase := range tests {
+					Expect(lex.NextToken()).To(Equal(testCase))
+				}
+			})
+		})
 	})
 })
