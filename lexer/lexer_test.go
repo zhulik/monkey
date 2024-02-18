@@ -8,7 +8,7 @@ import (
 )
 
 var _ = Describe("Lexer", func() {
-	Describe(".NextToken", func() {
+	Describe(".Tokens", func() {
 		Context("when lexing simple tokens", func() {
 			input := `=+(){},;
 let five = 5;
@@ -33,7 +33,7 @@ if (5 < 10) {
 9 <= 10;`
 			lex := lexer.New(input)
 
-			tests := []tokens.Token{
+			result := []tokens.Token{
 				tokens.New(tokens.ASSIGN),
 				tokens.New(tokens.PLUS),
 				tokens.New(tokens.LPAREN),
@@ -134,16 +134,12 @@ if (5 < 10) {
 				tokens.New(tokens.LTE),
 				tokens.New(tokens.INTEGER, "10"),
 				tokens.New(tokens.SEMICOLON),
-
-				tokens.New(tokens.EOF),
 			}
 
 			It("returns the next token", func() {
-				for _, testCase := range tests {
-					token, err := lex.NextToken()
-					Expect(err).ToNot(HaveOccurred())
-					Expect(token).To(Equal(testCase))
-				}
+				tokens, err := lex.Tokens()
+				Expect(err).ToNot(HaveOccurred())
+				Expect(tokens).To(Equal(result))
 			})
 		})
 	})

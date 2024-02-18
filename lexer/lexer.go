@@ -102,6 +102,20 @@ func (l *Lexer) NextToken() (tokens.Token, error) { //nolint:cyclop,funlen
 	return tok, nil
 }
 
+func (l *Lexer) Tokens() ([]tokens.Token, error) {
+	tkns := []tokens.Token{}
+
+	for token, err := l.NextToken(); token.Type != tokens.EOF; token, err = l.NextToken() {
+		if err != nil {
+			return []tokens.Token{}, err
+		}
+
+		tkns = append(tkns, token)
+	}
+
+	return tkns, nil
+}
+
 func (l *Lexer) identifierToken() tokens.Token {
 	literal := l.readIdentifier()
 
