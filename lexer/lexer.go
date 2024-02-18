@@ -25,7 +25,13 @@ func (l *Lexer) NextToken() tokens.Token { //nolint:cyclop,funlen
 
 	switch l.ch {
 	case '=':
-		tok = tokens.New(tokens.ASSIGN)
+		if l.peekChar() == '=' {
+			l.readChar()
+
+			tok = tokens.New(tokens.EQ)
+		} else {
+			tok = tokens.New(tokens.ASSIGN)
+		}
 	case '+':
 		tok = tokens.New(tokens.PLUS)
 	case '-':
@@ -51,7 +57,14 @@ func (l *Lexer) NextToken() tokens.Token { //nolint:cyclop,funlen
 	case ';':
 		tok = tokens.New(tokens.SEMICOLON)
 	case '!':
-		tok = tokens.New(tokens.BANG)
+		if l.peekChar() == '=' {
+			l.readChar()
+
+			tok = tokens.New(tokens.NEQ)
+		} else {
+			tok = tokens.New(tokens.BANG)
+		}
+
 	case 0:
 		tok = tokens.New(tokens.EOF)
 	default:
@@ -101,6 +114,14 @@ func (l *Lexer) readChar() {
 
 	l.position = l.readPosition
 	l.readPosition++
+}
+
+func (l Lexer) peekChar() byte {
+	if l.readPosition >= len(l.input) {
+		return 0
+	}
+
+	return l.input[l.readPosition]
 }
 
 func (l *Lexer) skipWhitespaces() {

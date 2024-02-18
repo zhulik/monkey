@@ -160,5 +160,32 @@ let result = add(five, ten);`
 				}
 			})
 		})
+
+		Context("when lexing some other tokens", func() {
+			input := `10 == 10;
+10 != 9;`
+
+			lex := lexer.New(input)
+
+			tests := []tokens.Token{
+				tokens.New(tokens.INTEGER, "10"),
+				tokens.New(tokens.EQ),
+				tokens.New(tokens.INTEGER, "10"),
+				tokens.New(tokens.SEMICOLON),
+
+				tokens.New(tokens.INTEGER, "10"),
+				tokens.New(tokens.NEQ),
+				tokens.New(tokens.INTEGER, "9"),
+				tokens.New(tokens.SEMICOLON),
+
+				tokens.New(tokens.EOF),
+			}
+
+			It("returns the next token", func() {
+				for _, testCase := range tests {
+					Expect(lex.NextToken()).To(Equal(testCase))
+				}
+			})
+		})
 	})
 })

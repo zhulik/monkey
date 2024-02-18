@@ -19,6 +19,9 @@ const (
 	GT TokenType = ">"
 	LT TokenType = "<"
 
+	EQ  TokenType = "=="
+	NEQ TokenType = "!="
+
 	COMMA     TokenType = ","
 	SEMICOLON TokenType = ";"
 
