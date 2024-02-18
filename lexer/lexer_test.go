@@ -93,5 +93,35 @@ let result = add(five, ten);`
 				}
 			})
 		})
+
+		Context("when lexing some other tokens", func() {
+			input := `!-/*5;
+5 < 10 > 5;`
+
+			lex := lexer.New(input)
+
+			tests := []tokens.Token{
+				tokens.New(tokens.BANG),
+				tokens.New(tokens.MINUS),
+				tokens.New(tokens.SLASH),
+				tokens.New(tokens.ASTERISK),
+				tokens.New(tokens.INTEGER, "5"),
+				tokens.New(tokens.SEMICOLON),
+
+				tokens.New(tokens.INTEGER, "5"),
+				tokens.New(tokens.LT),
+				tokens.New(tokens.INTEGER, "10"),
+				tokens.New(tokens.GT),
+				tokens.New(tokens.INTEGER, "5"),
+				tokens.New(tokens.SEMICOLON),
+				tokens.New(tokens.EOF),
+			}
+
+			It("returns the next token", func() {
+				for _, testCase := range tests {
+					Expect(lex.NextToken()).To(Equal(testCase))
+				}
+			})
+		})
 	})
 })

@@ -18,7 +18,7 @@ func New(input string) *Lexer {
 	return l
 }
 
-func (l *Lexer) NextToken() tokens.Token { //nolint:cyclop
+func (l *Lexer) NextToken() tokens.Token { //nolint:cyclop,funlen
 	l.skipWhitespaces()
 
 	var tok tokens.Token
@@ -28,6 +28,16 @@ func (l *Lexer) NextToken() tokens.Token { //nolint:cyclop
 		tok = tokens.New(tokens.ASSIGN)
 	case '+':
 		tok = tokens.New(tokens.PLUS)
+	case '-':
+		tok = tokens.New(tokens.MINUS)
+	case '/':
+		tok = tokens.New(tokens.SLASH)
+	case '*':
+		tok = tokens.New(tokens.ASTERISK)
+	case '<':
+		tok = tokens.New(tokens.LT)
+	case '>':
+		tok = tokens.New(tokens.GT)
 	case '(':
 		tok = tokens.New(tokens.LPAREN)
 	case ')':
@@ -40,6 +50,8 @@ func (l *Lexer) NextToken() tokens.Token { //nolint:cyclop
 		tok = tokens.New(tokens.COMMA)
 	case ';':
 		tok = tokens.New(tokens.SEMICOLON)
+	case '!':
+		tok = tokens.New(tokens.BANG)
 	case 0:
 		tok = tokens.New(tokens.EOF)
 	default:

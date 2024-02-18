@@ -9,8 +9,15 @@ const (
 	IDENTIFIER TokenType = "IDENTIFIER"
 	INTEGER    TokenType = "INTEGER"
 
-	ASSIGN TokenType = "="
-	PLUS   TokenType = "+"
+	ASSIGN   TokenType = "="
+	PLUS     TokenType = "+"
+	MINUS    TokenType = "-"
+	BANG     TokenType = "!"
+	ASTERISK TokenType = "*"
+	SLASH    TokenType = "/"
+
+	GT TokenType = ">"
+	LT TokenType = "<"
 
 	COMMA     TokenType = ","
 	SEMICOLON TokenType = ";"
