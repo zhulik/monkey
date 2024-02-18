@@ -45,19 +45,9 @@ func (l *Lexer) NextToken() tokens.Token { //nolint:cyclop
 	default:
 		switch {
 		case isLetter(l.ch):
-			literal := l.readIdentifier()
-
-			tok.Type = tokens.TypeFromLiteral(literal)
-			if tok.Type == tokens.IDENTIFIER {
-				tok.Literal = literal
-			}
-
-			return tok
+			return l.identifierToken()
 		case isDigit(l.ch):
-			tok.Literal = l.readNumber()
-			tok.Type = tokens.INTEGER
-
-			return tok
+			return l.numberToken()
 		default:
 			tok = tokens.New(tokens.ILLEGAL, string(l.ch))
 		}
@@ -66,6 +56,28 @@ func (l *Lexer) NextToken() tokens.Token { //nolint:cyclop
 	l.readChar()
 
 	return tok
+}
+
+func (l *Lexer) identifierToken() tokens.Token {
+	literal := l.readIdentifier()
+
+	var token tokens.Token
+
+	token.Type = tokens.TypeFromLiteral(literal)
+	if token.Type == tokens.IDENTIFIER {
+		token.Literal = literal
+	}
+
+	return token
+}
+
+func (l *Lexer) numberToken() tokens.Token {
+	var token tokens.Token
+
+	token.Literal = l.readNumber()
+	token.Type = tokens.INTEGER
+
+	return token
 }
 
 func (l *Lexer) readChar() {
@@ -80,25 +92,21 @@ func (l *Lexer) readChar() {
 }
 
 func (l *Lexer) skipWhitespaces() {
-	for isWhitespace(l.ch) {
-		l.readChar()
-	}
+	l.readAll(isWhitespace)
 }
 
 func (l *Lexer) readIdentifier() string {
-	position := l.position
-
-	for isLetter(l.ch) {
-		l.readChar()
-	}
-
-	return l.input[position:l.position]
+	return l.readAll(isLetter)
 }
 
 func (l *Lexer) readNumber() string {
+	return l.readAll(isDigit)
+}
+
+func (l *Lexer) readAll(fn func(byte) bool) string {
 	position := l.position
 
-	for isDigit(l.ch) {
+	for fn(l.ch) {
 		l.readChar()
 	}
 
