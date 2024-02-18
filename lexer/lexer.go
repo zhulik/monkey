@@ -1,8 +1,13 @@
 package lexer
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/zhulik/monkey/tokens"
 )
+
+var ErrIllegalCharacter = errors.New("illegal character")
 
 type Lexer struct {
 	input        string
@@ -18,7 +23,7 @@ func New(input string) *Lexer {
 	return l
 }
 
-func (l *Lexer) NextToken() tokens.Token { //nolint:cyclop,funlen
+func (l *Lexer) NextToken() (tokens.Token, error) { //nolint:cyclop,funlen
 	l.skipWhitespaces()
 
 	var tok tokens.Token
@@ -82,30 +87,19 @@ func (l *Lexer) NextToken() tokens.Token { //nolint:cyclop,funlen
 	default:
 		switch {
 		case isLetter(l.ch):
-			return l.identifierToken()
+			return l.identifierToken(), nil
 		case isDigit(l.ch):
-			return l.numberToken()
+			return l.numberToken(), nil
 		default:
-			tok = tokens.New(tokens.ILLEGAL, string(l.ch))
+			defer l.readChar()
+
+			return tokens.Token{}, fmt.Errorf("%w: '%s'", ErrIllegalCharacter, string(l.ch))
 		}
 	}
 
 	l.readChar()
 
-	return tok
-}
-
-func (l *Lexer) IterateTokens() func(func(int, tokens.Token) bool) {
-	return func(yield func(int, tokens.Token) bool) {
-		i := 0
-		for token := l.NextToken(); token.Type != tokens.EOF; token = l.NextToken() {
-			if !yield(i, token) {
-				return
-			}
-
-			i++
-		}
-	}
+	return tok, nil
 }
 
 func (l *Lexer) identifierToken() tokens.Token {

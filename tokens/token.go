@@ -3,8 +3,7 @@ package tokens
 type TokenType string
 
 const (
-	ILLEGAL TokenType = "ILLEGAL"
-	EOF     TokenType = "EOF"
+	EOF TokenType = "EOF"
 
 	IDENTIFIER TokenType = "IDENTIFIER"
 	INTEGER    TokenType = "INTEGER"

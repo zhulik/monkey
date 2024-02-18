@@ -37,7 +37,13 @@ func Start() error {
 		// 	fmt.Printf("%+v\n", token)
 		// }
 
-		for token := lex.NextToken(); token.Type != tokens.EOF; token = lex.NextToken() {
+		for token, lErr := lex.NextToken(); token.Type != tokens.EOF; token, lErr = lex.NextToken() {
+			if lErr != nil {
+				pp.Print("Lexing error: %w", lErr)
+
+				break
+			}
+
 			pp.Printf("%+v\n", token)
 		}
 	}

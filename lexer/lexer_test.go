@@ -27,7 +27,9 @@ var _ = Describe("Lexer", func() {
 
 			It("returns the next token", func() {
 				for _, testCase := range tests {
-					Expect(lex.NextToken()).To(Equal(testCase))
+					token, err := lex.NextToken()
+					Expect(err).ToNot(HaveOccurred())
+					Expect(token).To(Equal(testCase))
 				}
 			})
 		})
@@ -89,7 +91,9 @@ let result = add(five, ten);`
 
 			It("returns the next token", func() {
 				for _, testCase := range tests {
-					Expect(lex.NextToken()).To(Equal(testCase))
+					token, err := lex.NextToken()
+					Expect(err).ToNot(HaveOccurred())
+					Expect(token).To(Equal(testCase))
 				}
 			})
 		})
@@ -119,7 +123,9 @@ let result = add(five, ten);`
 
 			It("returns the next token", func() {
 				for _, testCase := range tests {
-					Expect(lex.NextToken()).To(Equal(testCase))
+					token, err := lex.NextToken()
+					Expect(err).ToNot(HaveOccurred())
+					Expect(token).To(Equal(testCase))
 				}
 			})
 		})
@@ -156,7 +162,9 @@ let result = add(five, ten);`
 
 			It("returns the next token", func() {
 				for _, testCase := range tests {
-					Expect(lex.NextToken()).To(Equal(testCase))
+					token, err := lex.NextToken()
+					Expect(err).ToNot(HaveOccurred())
+					Expect(token).To(Equal(testCase))
 				}
 			})
 		})
@@ -183,7 +191,9 @@ let result = add(five, ten);`
 
 			It("returns the next token", func() {
 				for _, testCase := range tests {
-					Expect(lex.NextToken()).To(Equal(testCase))
+					token, err := lex.NextToken()
+					Expect(err).ToNot(HaveOccurred())
+					Expect(token).To(Equal(testCase))
 				}
 			})
 		})
@@ -210,7 +220,9 @@ let result = add(five, ten);`
 
 			It("returns the next token", func() {
 				for _, testCase := range tests {
-					Expect(lex.NextToken()).To(Equal(testCase))
+					token, err := lex.NextToken()
+					Expect(err).ToNot(HaveOccurred())
+					Expect(token).To(Equal(testCase))
 				}
 			})
 		})
