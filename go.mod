@@ -5,9 +5,9 @@ go 1.22.0
 require (
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/k0kubun/pp v3.0.1+incompatible
-	github.com/k0kubun/pp/v3 v3.2.0
 	github.com/onsi/ginkgo/v2 v2.15.0
 	github.com/onsi/gomega v1.31.1
+	github.com/samber/lo v1.39.0
 	github.com/urfave/cli/v2 v2.27.1
 )
 
@@ -22,6 +22,7 @@ require (
 	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
+	golang.org/x/exp v0.0.0-20220303212507-bbda1eaf7a17 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect

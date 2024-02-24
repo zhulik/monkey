@@ -3,7 +3,9 @@ package ast
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
+	"github.com/samber/lo"
 	"github.com/zhulik/monkey/tokens"
 )
 
@@ -222,6 +224,30 @@ func (p BlockStatement) String() string {
 	for _, stmt := range p.Statements {
 		out.WriteString(stmt.String())
 	}
+
+	return out.String()
+}
+
+type FunctionExpression struct {
+	Token      tokens.Token
+	Parameters []*IdentifierExpression
+	Body       *BlockStatement
+}
+
+func (p FunctionExpression) expressionNode() {}
+func (p FunctionExpression) TokenLiteral() string {
+	return p.Token.Literal()
+}
+
+func (p FunctionExpression) String() string {
+	var out bytes.Buffer
+
+	params := lo.Map(p.Parameters, func(item *IdentifierExpression, _ int) string {
+		return item.String()
+	})
+
+	out.WriteString(p.TokenLiteral() + "(" + strings.Join(params, ", ") + ")")
+	out.WriteString(" { " + p.Body.String() + " }")
 
 	return out.String()
 }

@@ -67,6 +67,7 @@ func New(l *lexer.Lexer) (*Parser, error) {
 		tokens.FALSE:      parser.parseBooleanExpression,
 		tokens.LPAREN:     parser.parseGroupedExpression,
 		tokens.IF:         parser.parseIfExpression,
+		tokens.FUNCTION:   parser.parseFunctionExpression,
 	}
 	parser.infixParseFns = map[tokens.TokenType]infixParseFn{
 		tokens.PLUS:     parser.parseInfixExpression,
@@ -432,6 +433,79 @@ func (p *Parser) parseInfixExpression(left ast.Expression) (ast.Expression, erro
 	return expr, nil
 }
 
+func (p *Parser) parseFunctionExpression() (ast.Expression, error) {
+	expr := ast.FunctionExpression{Token: p.currentToken}
+
+	err := p.expectPeek(tokens.LPAREN)
+	if err != nil {
+		return nil, err
+	}
+
+	params, err := p.parseFunctionParameters()
+	if err != nil {
+		return nil, err
+	}
+
+	expr.Parameters = params
+
+	err = p.expectPeek(tokens.LBRACE)
+	if err != nil {
+		return nil, err
+	}
+
+	block, err := p.parseBlockStatement()
+	if err != nil {
+		return nil, err
+	}
+
+	expr.Body = block
+
+	return expr, nil
+}
+
+func (p *Parser) parseFunctionParameters() ([]*ast.IdentifierExpression, error) {
+	params := []*ast.IdentifierExpression{}
+
+	if p.peekToken.Type == tokens.RPAREN {
+		err := p.nextToken()
+		if err != nil {
+			return nil, err
+		}
+
+		return params, nil
+	}
+
+	err := p.nextToken()
+	if err != nil {
+		return nil, err
+	}
+
+	identifier := &ast.IdentifierExpression{Token: p.currentToken, Value: p.currentToken.Literal()}
+	params = append(params, identifier)
+
+	for p.peekToken.Type == tokens.COMMA {
+		err = p.nextToken()
+		if err != nil {
+			return nil, err
+		}
+
+		err = p.nextToken()
+		if err != nil {
+			return nil, err
+		}
+
+		identifier = &ast.IdentifierExpression{Token: p.currentToken, Value: p.currentToken.Literal()}
+		params = append(params, identifier)
+	}
+
+	err = p.expectPeek(tokens.RPAREN)
+	if err != nil {
+		return nil, err
+	}
+
+	return params, nil
+}
+
 func (p *Parser) expectPeek(tokenType tokens.TokenType) error {
 	if p.peekToken.Type == tokenType {
 		err := p.nextToken()
@@ -442,7 +516,12 @@ func (p *Parser) expectPeek(tokenType tokens.TokenType) error {
 		return nil
 	}
 
-	return fmt.Errorf("%w. Expected: %s, found: %s", ErrInvalidToken, tokenType, p.peekToken.Type)
+	return fmt.Errorf("%w. Expected: %s, found: %s(%s)",
+		ErrInvalidToken,
+		tokenType,
+		p.peekToken.Type,
+		p.peekToken.Literal(),
+	)
 }
 
 func (p *Parser) nextToken() error {

@@ -73,7 +73,7 @@ var _ = Describe("Parser", func() {
 
 				It("returns en error", func() {
 					_, err := parseProgram(input)
-					Expect(err).To(MatchError("invalid token. Expected: IDENTIFIER, found: ="))
+					Expect(err).To(MatchError("invalid token. Expected: IDENTIFIER, found: =(=)"))
 				})
 			})
 
@@ -82,7 +82,7 @@ var _ = Describe("Parser", func() {
 
 				It("returns en error", func() {
 					_, err := parseProgram(input)
-					Expect(err).To(MatchError("invalid token. Expected: =, found: INTEGER"))
+					Expect(err).To(MatchError("invalid token. Expected: =, found: INTEGER(123)"))
 				})
 			})
 		})
@@ -322,6 +322,21 @@ var _ = Describe("Parser", func() {
 						cases := map[string]string{
 							"if (x < y) { x }":            "if (x < y) { x }",
 							"if (x < y) { x } else { y }": "if (x < y) { x } else { y }",
+						}
+
+						tableTests(cases)
+					})
+
+					Context("when expression is invalid", func() {
+						// TODO: write me
+					})
+				})
+
+				Context("when parsing functions", func() {
+					Context("when expressions are valid", func() {
+						cases := map[string]string{
+							"fn(x, y) { x + y }": "fn(x, y) { (x + y) }",
+							"fn() { 1 }":         "fn() { 1 }",
 						}
 
 						tableTests(cases)
