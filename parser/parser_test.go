@@ -20,6 +20,18 @@ func parseProgram(program string) (*ast.Program, error) {
 	return par.ParseProgram()
 }
 
+func tableTests(cases map[string]string) {
+	for input, output := range cases {
+		Context("when parsing "+input, func() {
+			It("returns parsed "+output, func() {
+				program, err := parseProgram(input)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(program.String()).To(Equal(output))
+			})
+		})
+	}
+}
+
 var _ = Describe("Parser", func() {
 	Describe(".ParseProgram", func() {
 		Context("when parsing let statements", func() {
@@ -175,16 +187,7 @@ var _ = Describe("Parser", func() {
 					"2 > 3 == false": "((2 > 3) == false)",
 				}
 
-				for input, output := range cases {
-					Context("when parsing "+input, func() { //nolint:goconst
-						It("returns parsed expression", func() {
-							program, err := parseProgram(input)
-							Expect(err).ToNot(HaveOccurred())
-
-							Expect(program.String()).To(Equal(output))
-						})
-					})
-				}
+				tableTests(cases)
 			})
 
 			Context("when expression is invalid", func() {
@@ -306,15 +309,7 @@ var _ = Describe("Parser", func() {
 							"!(true == true)":            "(!(true == true))",
 						}
 
-						for input, output := range cases {
-							Context("when parsing "+input, func() {
-								It("returns parsed expression with correct parenthsis", func() {
-									program, err := parseProgram(input)
-									Expect(err).ToNot(HaveOccurred())
-									Expect(program.String()).To(Equal(output))
-								})
-							})
-						}
+						tableTests(cases)
 					})
 
 					Context("when expression is invalid", func() {
@@ -322,22 +317,14 @@ var _ = Describe("Parser", func() {
 					})
 				})
 
-				Context("when parsing math operations with mixed operator precedence", func() {
+				Context("when parsing if expressions", func() {
 					Context("when expressions are valid", func() {
 						cases := map[string]string{
 							"if (x < y) { x }":            "if (x < y) { x }",
 							"if (x < y) { x } else { y }": "if (x < y) { x } else { y }",
 						}
 
-						for input, output := range cases {
-							Context("when parsing "+input, func() {
-								It("returns parsed expression with correct parenthsis", func() {
-									program, err := parseProgram(input)
-									Expect(err).ToNot(HaveOccurred())
-									Expect(program.String()).To(Equal(output))
-								})
-							})
-						}
+						tableTests(cases)
 					})
 
 					Context("when expression is invalid", func() {
