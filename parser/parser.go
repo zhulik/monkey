@@ -141,9 +141,7 @@ func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
 		return nil, err
 	}
 
-	identifier := ast.NewValueNode[ast.IdentifierExpression](p.currentToken, p.currentToken.Literal())
-
-	stmt.Name = identifier
+	stmt.Name = ast.NewValueNode[ast.IdentifierExpression](p.currentToken, p.currentToken.Literal())
 
 	err = p.expectPeek(tokens.ASSIGN)
 	if err != nil {
@@ -155,12 +153,10 @@ func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
 		return nil, err
 	}
 
-	expr, err := p.parseExpression(LOWEST)
+	stmt.V, err = p.parseExpression(LOWEST)
 	if err != nil {
 		return nil, err
 	}
-
-	stmt.V = expr
 
 	if p.peekToken.Type == tokens.SEMICOLON {
 		err = p.nextTokenIgnoreEOF()
@@ -180,12 +176,10 @@ func (p *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
 		return nil, err
 	}
 
-	value, err := p.parseExpression(LOWEST)
+	stmt.V, err = p.parseExpression(LOWEST)
 	if err != nil {
 		return nil, err
 	}
-
-	stmt.V = value
 
 	if p.peekToken.Type == tokens.SEMICOLON {
 		err = p.nextTokenIgnoreEOF()
@@ -200,12 +194,12 @@ func (p *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
 func (p *Parser) parseExpressionStatement() (*ast.ExpressionStatement, error) {
 	stmt := ast.NewValueNode[ast.ExpressionStatement, ast.Expression](p.currentToken)
 
-	expression, err := p.parseExpression(LOWEST)
+	var err error
+
+	stmt.V, err = p.parseExpression(LOWEST)
 	if err != nil {
 		return nil, err
 	}
-
-	stmt.V = expression
 
 	if p.peekToken.Type == tokens.SEMICOLON {
 		nErr := p.nextToken()
@@ -269,12 +263,12 @@ func (p *Parser) parseIdentifierExpression() (ast.Expression, error) {
 func (p *Parser) parseIntegerExpression() (ast.Expression, error) {
 	expr := ast.NewValueNode[ast.IntegerExpression, int64](p.currentToken)
 
-	value, err := strconv.ParseInt(p.currentToken.Literal(), 10, 64)
+	var err error
+
+	expr.V, err = strconv.ParseInt(p.currentToken.Literal(), 10, 64)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing integer expression: %w", err)
 	}
-
-	expr.V = value
 
 	return expr, nil
 }
@@ -288,12 +282,10 @@ func (p *Parser) parsePrefixExpression() (ast.Expression, error) {
 		return nil, err
 	}
 
-	right, err := p.parseExpression(PREFIX)
+	expr.V, err = p.parseExpression(PREFIX)
 	if err != nil {
 		return nil, err
 	}
-
-	expr.V = right
 
 	return expr, nil
 }
@@ -334,12 +326,10 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) { //nolint:cyclop
 		return nil, err
 	}
 
-	cond, err := p.parseExpression(LOWEST)
+	expr.V, err = p.parseExpression(LOWEST)
 	if err != nil {
 		return nil, err
 	}
-
-	expr.V = cond
 
 	err = p.expectPeek(tokens.RPAREN)
 	if err != nil {
@@ -351,12 +341,10 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) { //nolint:cyclop
 		return nil, err
 	}
 
-	block, err := p.parseBlockStatement()
+	expr.Then, err = p.parseBlockStatement()
 	if err != nil {
 		return nil, err
 	}
-
-	expr.Then = block
 
 	if p.peekToken.Type == tokens.ELSE {
 		err = p.nextToken()
@@ -369,12 +357,10 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) { //nolint:cyclop
 			return nil, err
 		}
 
-		block, err = p.parseBlockStatement()
+		expr.Else, err = p.parseBlockStatement()
 		if err != nil {
 			return nil, err
 		}
-
-		expr.Else = block
 	}
 
 	return expr, nil
@@ -420,12 +406,10 @@ func (p *Parser) parseInfixExpression(left ast.Expression) (ast.Expression, erro
 		return nil, err
 	}
 
-	right, err := p.parseExpression(precedence)
+	expr.Right, err = p.parseExpression(precedence)
 	if err != nil {
 		return nil, err
 	}
-
-	expr.Right = right
 
 	return expr, nil
 }
@@ -433,12 +417,12 @@ func (p *Parser) parseInfixExpression(left ast.Expression) (ast.Expression, erro
 func (p *Parser) parseCallExpression(function ast.Expression) (ast.Expression, error) {
 	expr := ast.NewValueNode[ast.CallExpression](p.currentToken, function)
 
-	args, err := p.parseCallArguments()
+	var err error
+
+	expr.Arguments, err = p.parseCallArguments()
 	if err != nil {
 		return nil, err
 	}
-
-	expr.Arguments = args
 
 	return expr, nil
 }
@@ -514,12 +498,10 @@ func (p *Parser) parseFunctionExpression() (ast.Expression, error) {
 		return nil, err
 	}
 
-	block, err := p.parseBlockStatement()
+	expr.V, err = p.parseBlockStatement()
 	if err != nil {
 		return nil, err
 	}
-
-	expr.V = block
 
 	return expr, nil
 }
@@ -541,9 +523,7 @@ func (p *Parser) parseFunctionParameters() ([]*ast.IdentifierExpression, error) 
 		return nil, err
 	}
 
-	identifier := ast.NewValueNode[ast.IdentifierExpression](p.currentToken, p.currentToken.Literal())
-
-	params = append(params, identifier)
+	params = append(params, ast.NewValueNode[ast.IdentifierExpression](p.currentToken, p.currentToken.Literal()))
 
 	for p.peekToken.Type == tokens.COMMA {
 		err = p.nextToken()
@@ -556,9 +536,7 @@ func (p *Parser) parseFunctionParameters() ([]*ast.IdentifierExpression, error) 
 			return nil, err
 		}
 
-		identifier = ast.NewValueNode[ast.IdentifierExpression](p.currentToken, p.currentToken.Literal())
-
-		params = append(params, identifier)
+		params = append(params, ast.NewValueNode[ast.IdentifierExpression](p.currentToken, p.currentToken.Literal()))
 	}
 
 	err = p.expectPeek(tokens.RPAREN)
