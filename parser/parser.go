@@ -90,11 +90,9 @@ func New(l *lexer.Lexer) (*Parser, error) {
 	}
 
 	// It's possible the have only one token in the program.
-	err = parser.nextToken()
+	err = parser.nextTokenIgnoreEOF()
 	if err != nil {
-		if !errors.Is(err, io.EOF) {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	return parser, nil
@@ -165,12 +163,8 @@ func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
 	stmt.V = expr
 
 	if p.peekToken.Type == tokens.SEMICOLON {
-		err = p.nextToken()
+		err = p.nextTokenIgnoreEOF()
 		if err != nil {
-			if errors.Is(err, io.EOF) {
-				return stmt, nil
-			}
-
 			return nil, err
 		}
 	}
@@ -194,12 +188,8 @@ func (p *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
 	stmt.V = value
 
 	if p.peekToken.Type == tokens.SEMICOLON {
-		err = p.nextToken()
+		err = p.nextTokenIgnoreEOF()
 		if err != nil {
-			if errors.Is(err, io.EOF) {
-				return stmt, nil
-			}
-
 			return nil, err
 		}
 	}
@@ -293,11 +283,9 @@ func (p *Parser) parsePrefixExpression() (ast.Expression, error) {
 	expr := ast.NewValueNode[ast.PrefixExpression, ast.Expression](p.currentToken)
 	expr.Operator = p.currentToken.Literal()
 
-	err := p.nextToken()
+	err := p.nextTokenIgnoreEOF()
 	if err != nil {
-		if !errors.Is(err, io.EOF) {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	right, err := p.parseExpression(PREFIX)
@@ -325,12 +313,8 @@ func (p *Parser) parseGroupedExpression() (ast.Expression, error) {
 		return nil, err
 	}
 
-	err = p.expectPeek(tokens.RPAREN)
+	err = ignoreError(p.expectPeek(tokens.RPAREN), io.EOF)
 	if err != nil {
-		if errors.Is(err, io.EOF) {
-			return expr, nil
-		}
-
 		return nil, err
 	}
 
@@ -399,12 +383,8 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) { //nolint:cyclop
 func (p *Parser) parseBlockStatement() (*ast.BlockStatement, error) {
 	block := ast.NewValueNode[ast.BlockStatement, []ast.Statement](p.currentToken)
 
-	err := p.nextToken()
+	err := p.nextTokenIgnoreEOF()
 	if err != nil {
-		if errors.Is(err, io.EOF) {
-			return block, nil
-		}
-
 		return nil, err
 	}
 
@@ -435,11 +415,9 @@ func (p *Parser) parseInfixExpression(left ast.Expression) (ast.Expression, erro
 
 	precedence := precedence(p.currentToken)
 
-	err := p.nextToken()
+	err := p.nextTokenIgnoreEOF()
 	if err != nil {
-		if !errors.Is(err, io.EOF) {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	right, err := p.parseExpression(precedence)
@@ -465,16 +443,12 @@ func (p *Parser) parseCallExpression(function ast.Expression) (ast.Expression, e
 	return expr, nil
 }
 
-func (p *Parser) parseCallArguments() ([]ast.Expression, error) { //nolint:cyclop
+func (p *Parser) parseCallArguments() ([]ast.Expression, error) {
 	args := []ast.Expression{}
 
 	if p.peekToken.Type == tokens.RPAREN {
-		err := p.nextToken()
+		err := p.nextTokenIgnoreEOF()
 		if err != nil {
-			if errors.Is(err, io.EOF) {
-				return args, nil
-			}
-
 			return nil, err
 		}
 
@@ -512,12 +486,8 @@ func (p *Parser) parseCallArguments() ([]ast.Expression, error) { //nolint:cyclo
 		args = append(args, expr)
 	}
 
-	err = p.expectPeek(tokens.RPAREN)
+	err = ignoreError(p.expectPeek(tokens.RPAREN), io.EOF)
 	if err != nil {
-		if errors.Is(err, io.EOF) {
-			return args, nil
-		}
-
 		return nil, err
 	}
 
@@ -628,6 +598,18 @@ func (p *Parser) nextToken() error {
 	p.peekToken = peekToken
 
 	return nil
+}
+
+func (p *Parser) nextTokenIgnoreEOF() error {
+	return ignoreError(p.nextToken(), io.EOF)
+}
+
+func ignoreError(err, errToIgnore error) error {
+	if errors.Is(err, errToIgnore) {
+		return nil
+	}
+
+	return err
 }
 
 func precedence(token tokens.Token) int {
