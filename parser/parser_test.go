@@ -176,7 +176,7 @@ var _ = Describe("Parser", func() {
 				}
 
 				for input, output := range cases {
-					Context("when parsing"+input, func() {
+					Context("when parsing "+input, func() {
 						It("returns parsed expression", func() {
 							program, err := parseProgram(input)
 							Expect(err).ToNot(HaveOccurred())
@@ -255,7 +255,7 @@ var _ = Describe("Parser", func() {
 				}
 
 				for _, testCase := range cases {
-					Context("when input is"+testCase.input, func() {
+					Context("when input is "+testCase.input, func() {
 						It("returns parsed expression", func() {
 							program, err := parseProgram(testCase.input)
 							Expect(err).ToNot(HaveOccurred())
@@ -299,10 +299,15 @@ var _ = Describe("Parser", func() {
 							"3 + 4 * 5 == 3 * 1 + 4 * 5": "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))",
 							"3 + 4 * 5 >= 3 * 1 + 4 * 5": "((3 + (4 * 5)) >= ((3 * 1) + (4 * 5)))",
 							"3 + 4 * 5 <= 3 * 1 + 4 * 5": "((3 + (4 * 5)) <= ((3 * 1) + (4 * 5)))",
+							"1 + (2 + 3) + 4":            "((1 + (2 + 3)) + 4)",
+							"(5 + 5) * 2":                "((5 + 5) * 2)",
+							"2 / (5 + 5)":                "(2 / (5 + 5))",
+							"-(5 + 5)":                   "(-(5 + 5))",
+							"!(true == true)":            "(!(true == true))",
 						}
 
 						for input, output := range cases {
-							Context("when parsing"+input, func() {
+							Context("when parsing "+input, func() {
 								It("returns parsed expression with correct parenthsis", func() {
 									program, err := parseProgram(input)
 									Expect(err).ToNot(HaveOccurred())
