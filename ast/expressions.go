@@ -9,6 +9,12 @@ import (
 	"github.com/zhulik/monkey/tokens"
 )
 
+type ExpressionNode[T any] struct {
+	ValueNode[T]
+}
+
+func (sn StatementNode[T]) expressionNode() {}
+
 type IdentifierExpression struct {
 	tokens.Token
 	Value string

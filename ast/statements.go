@@ -9,9 +9,6 @@ type StatementNode[T any] struct {
 }
 
 func (sn StatementNode[T]) statementNode() {}
-func (sn StatementNode[T]) TokenLiteral() string {
-	return sn.Token.Literal()
-}
 
 type LetStatement struct {
 	StatementNode[Expression]

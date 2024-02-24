@@ -26,8 +26,12 @@ type ValueNode[T any] struct {
 	V T
 }
 
-func (v ValueNode[T]) Value() T {
-	return v.V
+func (vn ValueNode[T]) Value() T {
+	return vn.V
+}
+
+func (vn ValueNode[T]) TokenLiteral() string {
+	return vn.Token.Literal()
 }
 
 type Program struct {
