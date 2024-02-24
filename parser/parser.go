@@ -319,10 +319,6 @@ func (p *Parser) parseGroupedExpression() (ast.Expression, error) {
 
 	expr, err := p.parseExpression(LOWEST)
 	if err != nil {
-		if errors.Is(err, io.EOF) {
-			return expr, nil
-		}
-
 		return nil, err
 	}
 
@@ -448,9 +444,7 @@ func (p *Parser) parseInfixExpression(left ast.Expression) (ast.Expression, erro
 
 	right, err := p.parseExpression(precedence)
 	if err != nil {
-		if !errors.Is(err, io.EOF) {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	expr.Right = right
@@ -463,10 +457,6 @@ func (p *Parser) parseCallExpression(function ast.Expression) (ast.Expression, e
 
 	args, err := p.parseCallArguments()
 	if err != nil {
-		if errors.Is(err, io.EOF) {
-			return expr, nil
-		}
-
 		return nil, err
 	}
 
@@ -475,7 +465,7 @@ func (p *Parser) parseCallExpression(function ast.Expression) (ast.Expression, e
 	return expr, nil
 }
 
-func (p *Parser) parseCallArguments() ([]ast.Expression, error) { //nolint:funlen,gocognit,cyclop
+func (p *Parser) parseCallArguments() ([]ast.Expression, error) { //nolint:cyclop
 	args := []ast.Expression{}
 
 	if p.peekToken.Type == tokens.RPAREN {
@@ -493,19 +483,11 @@ func (p *Parser) parseCallArguments() ([]ast.Expression, error) { //nolint:funle
 
 	err := p.nextToken()
 	if err != nil {
-		if errors.Is(err, io.EOF) {
-			return args, nil
-		}
-
 		return nil, err
 	}
 
 	expr, err := p.parseExpression(LOWEST)
 	if err != nil {
-		if errors.Is(err, io.EOF) {
-			return args, nil
-		}
-
 		return nil, err
 	}
 
@@ -514,28 +496,16 @@ func (p *Parser) parseCallArguments() ([]ast.Expression, error) { //nolint:funle
 	for p.peekToken.Type == tokens.COMMA {
 		err = p.nextToken()
 		if err != nil {
-			if errors.Is(err, io.EOF) {
-				return args, nil
-			}
-
 			return nil, err
 		}
 
 		err = p.nextToken()
 		if err != nil {
-			if errors.Is(err, io.EOF) {
-				return args, nil
-			}
-
 			return nil, err
 		}
 
 		expr, err = p.parseExpression(LOWEST)
 		if err != nil {
-			if errors.Is(err, io.EOF) {
-				return args, nil
-			}
-
 			return nil, err
 		}
 
