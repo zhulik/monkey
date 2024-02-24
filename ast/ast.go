@@ -200,12 +200,30 @@ func (p IfExpression) TokenLiteral() string {
 }
 
 func (p IfExpression) String() string {
-	result := fmt.Sprintf("if %s { %s }", p.Condition.String(), p.Then.String())
-	if p.Else != nil {
-		result = fmt.Sprintf("%s else { %s }", result, p.Else.String())
+	var out bytes.Buffer
+
+	out.WriteString("if ")
+	out.WriteString(p.Condition.String())
+
+	thenBody := p.Then.String()
+
+	if len(thenBody) > 0 {
+		out.WriteString(" { " + thenBody + " }")
+	} else {
+		out.WriteString(" { }")
 	}
 
-	return result
+	if p.Else != nil {
+		elseBody := p.Else.String()
+
+		if len(elseBody) > 0 {
+			out.WriteString(" else { " + elseBody + " }")
+		} else {
+			out.WriteString(" else { }")
+		}
+	}
+
+	return out.String()
 }
 
 type BlockStatement struct {
@@ -247,7 +265,13 @@ func (p FunctionExpression) String() string {
 	})
 
 	out.WriteString(p.TokenLiteral() + "(" + strings.Join(params, ", ") + ")")
-	out.WriteString(" { " + p.Body.String() + " }")
+	body := p.Body.String()
+
+	if len(body) > 0 {
+		out.WriteString(" { " + p.Body.String() + " }")
+	} else {
+		out.WriteString(" { }")
+	}
 
 	return out.String()
 }

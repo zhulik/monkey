@@ -321,7 +321,9 @@ var _ = Describe("Parser", func() {
 					Context("when expressions are valid", func() {
 						cases := map[string]string{
 							"if (x < y) { x }":            "if (x < y) { x }",
+							"if (x < y) { }":              "if (x < y) { }",
 							"if (x < y) { x } else { y }": "if (x < y) { x } else { y }",
+							"if (x < y) { x } else { }":   "if (x < y) { x } else { }",
 						}
 
 						tableTests(cases)
@@ -337,6 +339,7 @@ var _ = Describe("Parser", func() {
 						cases := map[string]string{
 							"fn(x, y) { x + y }": "fn(x, y) { (x + y) }",
 							"fn() { 1 }":         "fn() { 1 }",
+							"fn(x, y, z) { }":    "fn(x, y, z) { }",
 						}
 
 						tableTests(cases)

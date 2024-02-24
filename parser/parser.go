@@ -381,6 +381,10 @@ func (p *Parser) parseBlockStatement() (*ast.BlockStatement, error) {
 
 	err := p.nextToken()
 	if err != nil {
+		if errors.Is(err, io.EOF) {
+			return block, nil
+		}
+
 		return nil, err
 	}
 
