@@ -12,9 +12,9 @@ var _ = Describe("Parser", func() {
 		Context("when program is valid", func() {
 			cases := map[string]string{
 				// Let statements.
-				// "let a = 5;":       "",
-				// "let foo = bar;":   "",
-				// "let a = bar + 5;": "",
+				"let a = 5;":       "let a = 5;",
+				"let foo = bar;":   "let foo = bar;",
+				"let a = bar + 5;": "let a = (bar + 5);",
 
 				// // return statements.
 				// "return 5;":       "",
