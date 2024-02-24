@@ -430,49 +430,19 @@ func (p *Parser) parseCallExpression(function ast.Expression) (ast.Expression, e
 func (p *Parser) parseCallArguments() ([]ast.Expression, error) {
 	args := []ast.Expression{}
 
-	if p.peekToken.Type == tokens.RPAREN {
-		err := p.nextTokenIgnoreEOF()
+	for err := p.nextToken(); p.currentToken.Type != tokens.RPAREN; err = p.nextToken() {
 		if err != nil {
 			return nil, err
 		}
 
-		return args, nil
-	}
+		if p.currentToken.Type != tokens.COMMA {
+			expr, eErr := p.parseExpression(LOWEST)
+			if eErr != nil {
+				return nil, eErr
+			}
 
-	err := p.nextToken()
-	if err != nil {
-		return nil, err
-	}
-
-	expr, err := p.parseExpression(LOWEST)
-	if err != nil {
-		return nil, err
-	}
-
-	args = append(args, expr)
-
-	for p.peekToken.Type == tokens.COMMA {
-		err = p.nextToken()
-		if err != nil {
-			return nil, err
+			args = append(args, expr)
 		}
-
-		err = p.nextToken()
-		if err != nil {
-			return nil, err
-		}
-
-		expr, err = p.parseExpression(LOWEST)
-		if err != nil {
-			return nil, err
-		}
-
-		args = append(args, expr)
-	}
-
-	err = ignoreError(p.expectPeek(tokens.RPAREN), io.EOF)
-	if err != nil {
-		return nil, err
 	}
 
 	return args, nil
