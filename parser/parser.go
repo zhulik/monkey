@@ -486,7 +486,7 @@ func (p *Parser) parseFunctionExpression() (ast.Expression, error) {
 		return nil, err
 	}
 
-	params, err := p.parseFunctionParameters()
+	params, err := p.parseFunctionArguments()
 	if err != nil {
 		return nil, err
 	}
@@ -506,45 +506,20 @@ func (p *Parser) parseFunctionExpression() (ast.Expression, error) {
 	return expr, nil
 }
 
-func (p *Parser) parseFunctionParameters() ([]*ast.IdentifierExpression, error) {
-	params := []*ast.IdentifierExpression{}
+func (p *Parser) parseFunctionArguments() ([]*ast.IdentifierExpression, error) {
+	args := []*ast.IdentifierExpression{}
 
-	if p.peekToken.Type == tokens.RPAREN {
-		err := p.nextToken()
+	for err := p.nextToken(); p.currentToken.Type != tokens.RPAREN; err = p.nextToken() {
 		if err != nil {
 			return nil, err
 		}
 
-		return params, nil
-	}
-
-	err := p.nextToken()
-	if err != nil {
-		return nil, err
-	}
-
-	params = append(params, ast.NewValueNode[ast.IdentifierExpression](p.currentToken, p.currentToken.Literal()))
-
-	for p.peekToken.Type == tokens.COMMA {
-		err = p.nextToken()
-		if err != nil {
-			return nil, err
+		if p.currentToken.Type != tokens.COMMA {
+			args = append(args, ast.NewValueNode[ast.IdentifierExpression](p.currentToken, p.currentToken.Literal()))
 		}
-
-		err = p.nextToken()
-		if err != nil {
-			return nil, err
-		}
-
-		params = append(params, ast.NewValueNode[ast.IdentifierExpression](p.currentToken, p.currentToken.Literal()))
 	}
 
-	err = p.expectPeek(tokens.RPAREN)
-	if err != nil {
-		return nil, err
-	}
-
-	return params, nil
+	return args, nil
 }
 
 func (p *Parser) expectPeek(tokenType tokens.TokenType) error {
