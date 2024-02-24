@@ -136,7 +136,11 @@ func (p *Parser) parseStatement() (ast.Statement, error) {
 }
 
 func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
-	stmt := &ast.LetStatement{Token: p.currentToken}
+	stmt := &ast.LetStatement{
+		StatementNode: ast.StatementNode[ast.Expression]{
+			ValueNode: ast.ValueNode[ast.Expression]{Token: p.currentToken},
+		},
+	} // TODO: fix
 
 	err := p.expectPeek(tokens.IDENTIFIER)
 	if err != nil {
@@ -160,7 +164,7 @@ func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
 		return nil, err
 	}
 
-	stmt.Value = expr
+	stmt.ValueNode.V = expr
 
 	if p.peekToken.Type == tokens.SEMICOLON {
 		err = p.nextToken()
@@ -177,7 +181,11 @@ func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
 }
 
 func (p *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
-	stmt := &ast.ReturnStatement{Token: p.currentToken}
+	stmt := &ast.ReturnStatement{ // TODO: fix
+		StatementNode: ast.StatementNode[ast.Expression]{
+			ValueNode: ast.ValueNode[ast.Expression]{Token: p.currentToken},
+		},
+	}
 
 	err := p.nextToken()
 	if err != nil {
@@ -189,7 +197,7 @@ func (p *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
 		return nil, err
 	}
 
-	stmt.Value = value
+	stmt.ValueNode.V = value
 
 	if p.peekToken.Type == tokens.SEMICOLON {
 		err = p.nextToken()
@@ -206,14 +214,18 @@ func (p *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
 }
 
 func (p *Parser) parseExpressionStatement() (*ast.ExpressionStatement, error) {
-	stmt := &ast.ExpressionStatement{Token: p.currentToken}
+	stmt := &ast.ExpressionStatement{ // TODO: fix
+		StatementNode: ast.StatementNode[ast.Expression]{
+			ValueNode: ast.ValueNode[ast.Expression]{Token: p.currentToken},
+		},
+	}
 
 	expression, err := p.parseExpression(LOWEST)
 	if err != nil {
 		return nil, err
 	}
 
-	stmt.Expression = expression
+	stmt.ValueNode.V = expression
 
 	if p.peekToken.Type == tokens.SEMICOLON {
 		nErr := p.nextToken()
@@ -302,7 +314,7 @@ func (p *Parser) parsePrefixExpression() (ast.Expression, error) {
 		return nil, err
 	}
 
-	expr.Right = right
+	expr.Value = right
 
 	return expr, nil
 }
@@ -394,7 +406,11 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) { //nolint:cyclop
 }
 
 func (p *Parser) parseBlockStatement() (*ast.BlockStatement, error) {
-	block := &ast.BlockStatement{Token: p.currentToken}
+	block := &ast.BlockStatement{ // TODO: fix
+		StatementNode: ast.StatementNode[[]ast.Statement]{
+			ValueNode: ast.ValueNode[[]ast.Statement]{Token: p.currentToken},
+		},
+	}
 
 	err := p.nextToken()
 	if err != nil {
@@ -411,7 +427,7 @@ func (p *Parser) parseBlockStatement() (*ast.BlockStatement, error) {
 			return nil, sErr
 		}
 
-		block.Statements = append(block.Statements, stmt)
+		block.ValueNode.V = append(block.ValueNode.V, stmt)
 
 		nErr := p.nextToken()
 		if nErr != nil {

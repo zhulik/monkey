@@ -24,6 +24,24 @@ type Expression interface {
 	expressionNode()
 }
 
+type ValueNode[T any] struct {
+	tokens.Token
+	V T
+}
+
+func (v ValueNode[T]) Value() T {
+	return v.V
+}
+
+type StatementNode[T any] struct {
+	ValueNode[T]
+}
+
+func (sn StatementNode[T]) statementNode() {}
+func (sn StatementNode[T]) TokenLiteral() string {
+	return sn.Token.Literal()
+}
+
 type Program struct {
 	Statements []Statement
 }
@@ -47,14 +65,8 @@ func (p Program) String() string {
 }
 
 type LetStatement struct {
-	Token tokens.Token
-	Name  *IdentifierExpression
-	Value Expression
-}
-
-func (l LetStatement) statementNode() {}
-func (l LetStatement) TokenLiteral() string {
-	return l.Token.Literal()
+	StatementNode[Expression]
+	Name *IdentifierExpression
 }
 
 func (l LetStatement) String() string {
@@ -63,8 +75,8 @@ func (l LetStatement) String() string {
 	out.WriteString(l.TokenLiteral() + " ")
 	out.WriteString(l.Name.String() + " = ")
 
-	if l.Value != nil {
-		out.WriteString(l.Value.String())
+	if l.Value() != nil {
+		out.WriteString(l.ValueNode.V.String())
 	}
 
 	out.WriteString(";")
@@ -73,7 +85,7 @@ func (l LetStatement) String() string {
 }
 
 type IdentifierExpression struct {
-	Token tokens.Token
+	tokens.Token
 	Value string
 }
 
@@ -87,13 +99,7 @@ func (i IdentifierExpression) String() string {
 }
 
 type ReturnStatement struct {
-	Token tokens.Token
-	Value Expression
-}
-
-func (r ReturnStatement) statementNode() {}
-func (r ReturnStatement) TokenLiteral() string {
-	return r.Token.Literal()
+	StatementNode[Expression]
 }
 
 func (r ReturnStatement) String() string {
@@ -101,8 +107,8 @@ func (r ReturnStatement) String() string {
 
 	out.WriteString(r.TokenLiteral() + " ")
 
-	if r.Value != nil {
-		out.WriteString(r.Value.String())
+	if r.Value() != nil {
+		out.WriteString(r.Value().String())
 	}
 
 	out.WriteString(";")
@@ -111,25 +117,19 @@ func (r ReturnStatement) String() string {
 }
 
 type ExpressionStatement struct {
-	Token      tokens.Token
-	Expression Expression
-}
-
-func (e ExpressionStatement) statementNode() {}
-func (e ExpressionStatement) TokenLiteral() string {
-	return e.Token.Literal()
+	StatementNode[Expression]
 }
 
 func (e ExpressionStatement) String() string {
-	if e.Expression != nil {
-		return e.Expression.String()
+	if e.Value() != nil {
+		return e.Value().String()
 	}
 
 	return ""
 }
 
 type IntegerExpression struct {
-	Token tokens.Token
+	tokens.Token
 	Value int64
 }
 
@@ -143,9 +143,9 @@ func (i IntegerExpression) String() string {
 }
 
 type PrefixExpression struct {
-	Token    tokens.Token
+	tokens.Token
 	Operator string
-	Right    Expression
+	Value    Expression
 }
 
 func (p PrefixExpression) expressionNode() {}
@@ -154,11 +154,11 @@ func (p PrefixExpression) TokenLiteral() string {
 }
 
 func (p PrefixExpression) String() string {
-	return fmt.Sprintf("(%s%s)", p.Operator, p.Right.String())
+	return fmt.Sprintf("(%s%s)", p.Operator, p.Value.String())
 }
 
 type InfixExpression struct {
-	Token    tokens.Token
+	tokens.Token
 	Left     Expression
 	Operator string
 	Right    Expression
@@ -174,7 +174,7 @@ func (p InfixExpression) String() string {
 }
 
 type BooleanExpression struct {
-	Token tokens.Token
+	tokens.Token
 	Value bool
 }
 
@@ -188,7 +188,7 @@ func (p BooleanExpression) String() string {
 }
 
 type IfExpression struct {
-	Token     tokens.Token
+	tokens.Token
 	Condition Expression
 	Then      *BlockStatement
 	Else      *BlockStatement
@@ -227,19 +227,13 @@ func (p IfExpression) String() string {
 }
 
 type BlockStatement struct {
-	Token      tokens.Token
-	Statements []Statement
-}
-
-func (p BlockStatement) statementNode() {}
-func (p BlockStatement) TokenLiteral() string {
-	return p.Token.Literal()
+	StatementNode[[]Statement]
 }
 
 func (p BlockStatement) String() string {
 	var out bytes.Buffer
 
-	for _, stmt := range p.Statements {
+	for _, stmt := range p.Value() {
 		out.WriteString(stmt.String())
 	}
 
@@ -247,7 +241,7 @@ func (p BlockStatement) String() string {
 }
 
 type FunctionExpression struct {
-	Token      tokens.Token
+	tokens.Token
 	Parameters []*IdentifierExpression
 	Body       *BlockStatement
 }
@@ -277,7 +271,7 @@ func (p FunctionExpression) String() string {
 }
 
 type CallExpression struct {
-	Token     tokens.Token
+	tokens.Token
 	Function  Expression // FunctionExpression or IdentifierExpression
 	Arguments []Expression
 }
