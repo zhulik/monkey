@@ -184,14 +184,21 @@ func (p *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
 		return nil, err
 	}
 
-	for p.currentToken.Type != tokens.SEMICOLON {
-		nErr := p.nextToken()
-		if nErr != nil {
-			if errors.Is(nErr, io.EOF) {
+	value, err := p.parseExpression(LOWEST)
+	if err != nil {
+		return nil, err
+	}
+
+	stmt.Value = value
+
+	if p.peekToken.Type == tokens.SEMICOLON {
+		err = p.nextToken()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
 				return stmt, nil
 			}
 
-			return nil, nErr
+			return nil, err
 		}
 	}
 

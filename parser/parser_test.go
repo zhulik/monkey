@@ -17,9 +17,9 @@ var _ = Describe("Parser", func() {
 				"let a = bar + 5;": "let a = (bar + 5);",
 
 				// // return statements.
-				// "return 5;":       "",
-				// "return bar;":     "",
-				// "return bar + 5;": "",
+				"return 5;":       "return 5;",
+				"return bar;":     "return bar;",
+				"return bar + 5;": "return (bar + 5);",
 
 				// Basic expressions.
 				"foobar":         "foobar",
