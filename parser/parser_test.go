@@ -176,7 +176,7 @@ var _ = Describe("Parser", func() {
 				}
 
 				for input, output := range cases {
-					Context("when parsing "+input, func() {
+					Context("when parsing "+input, func() { //nolint:goconst
 						It("returns parsed expression", func() {
 							program, err := parseProgram(input)
 							Expect(err).ToNot(HaveOccurred())
@@ -304,6 +304,29 @@ var _ = Describe("Parser", func() {
 							"2 / (5 + 5)":                "(2 / (5 + 5))",
 							"-(5 + 5)":                   "(-(5 + 5))",
 							"!(true == true)":            "(!(true == true))",
+						}
+
+						for input, output := range cases {
+							Context("when parsing "+input, func() {
+								It("returns parsed expression with correct parenthsis", func() {
+									program, err := parseProgram(input)
+									Expect(err).ToNot(HaveOccurred())
+									Expect(program.String()).To(Equal(output))
+								})
+							})
+						}
+					})
+
+					Context("when expression is invalid", func() {
+						// TODO: write me
+					})
+				})
+
+				Context("when parsing math operations with mixed operator precedence", func() {
+					Context("when expressions are valid", func() {
+						cases := map[string]string{
+							"if (x < y) { x }":            "if (x < y) { x }",
+							"if (x < y) { x } else { y }": "if (x < y) { x } else { y }",
 						}
 
 						for input, output := range cases {

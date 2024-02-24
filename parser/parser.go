@@ -66,6 +66,7 @@ func New(l *lexer.Lexer) (*Parser, error) {
 		tokens.TRUE:       parser.parseBooleanExpression,
 		tokens.FALSE:      parser.parseBooleanExpression,
 		tokens.LPAREN:     parser.parseGroupedExpression,
+		tokens.IF:         parser.parseIfExpression,
 	}
 	parser.infixParseFns = map[tokens.TokenType]infixParseFn{
 		tokens.PLUS:     parser.parseInfixExpression,
@@ -313,6 +314,94 @@ func (p *Parser) parseGroupedExpression() (ast.Expression, error) {
 	}
 
 	return expr, nil
+}
+
+func (p *Parser) parseIfExpression() (ast.Expression, error) { //nolint:cyclop
+	expr := ast.IfExpression{Token: p.currentToken}
+
+	err := p.expectPeek(tokens.LPAREN)
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.nextToken()
+	if err != nil {
+		return nil, err
+	}
+
+	cond, err := p.parseExpression(LOWEST)
+	if err != nil {
+		return nil, err
+	}
+
+	expr.Condition = cond
+
+	err = p.expectPeek(tokens.RPAREN)
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.expectPeek(tokens.LBRACE)
+	if err != nil {
+		return nil, err
+	}
+
+	block, err := p.parseBlockStatement()
+	if err != nil {
+		return nil, err
+	}
+
+	expr.Then = block
+
+	if p.peekToken.Type == tokens.ELSE {
+		err = p.nextToken()
+		if err != nil {
+			return nil, err
+		}
+
+		err = p.expectPeek(tokens.LBRACE)
+		if err != nil {
+			return nil, err
+		}
+
+		block, err = p.parseBlockStatement()
+		if err != nil {
+			return nil, err
+		}
+
+		expr.Else = block
+	}
+
+	return expr, nil
+}
+
+func (p *Parser) parseBlockStatement() (*ast.BlockStatement, error) {
+	block := &ast.BlockStatement{Token: p.currentToken}
+
+	err := p.nextToken()
+	if err != nil {
+		return nil, err
+	}
+
+	for p.currentToken.Type != tokens.RBRACE {
+		stmt, sErr := p.parseStatement()
+		if sErr != nil {
+			return nil, sErr
+		}
+
+		block.Statements = append(block.Statements, stmt)
+
+		nErr := p.nextToken()
+		if nErr != nil {
+			if errors.Is(nErr, io.EOF) {
+				return block, nil
+			}
+
+			return nil, nErr
+		}
+	}
+
+	return block, nil
 }
 
 func (p *Parser) parseInfixExpression(left ast.Expression) (ast.Expression, error) {

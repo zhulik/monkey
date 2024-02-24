@@ -184,3 +184,44 @@ func (p BooleanExpression) TokenLiteral() string {
 func (p BooleanExpression) String() string {
 	return p.Token.Literal()
 }
+
+type IfExpression struct {
+	Token     tokens.Token
+	Condition Expression
+	Then      *BlockStatement
+	Else      *BlockStatement
+}
+
+func (p IfExpression) expressionNode() {}
+func (p IfExpression) TokenLiteral() string {
+	return p.Token.Literal()
+}
+
+func (p IfExpression) String() string {
+	result := fmt.Sprintf("if %s { %s }", p.Condition.String(), p.Then.String())
+	if p.Else != nil {
+		result = fmt.Sprintf("%s else { %s }", result, p.Else.String())
+	}
+
+	return result
+}
+
+type BlockStatement struct {
+	Token      tokens.Token
+	Statements []Statement
+}
+
+func (p BlockStatement) statementNode() {}
+func (p BlockStatement) TokenLiteral() string {
+	return p.Token.Literal()
+}
+
+func (p BlockStatement) String() string {
+	var out bytes.Buffer
+
+	for _, stmt := range p.Statements {
+		out.WriteString(stmt.String())
+	}
+
+	return out.String()
+}
