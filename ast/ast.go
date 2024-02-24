@@ -30,6 +30,14 @@ func (vn ValueNode[T]) Value() T {
 	return vn.V
 }
 
+func (vn *ValueNode[T]) SetValue(value T) {
+	vn.V = value
+}
+
+func (vn *ValueNode[T]) SetToken(token tokens.Token) {
+	vn.Token = token
+}
+
 func (vn ValueNode[T]) TokenLiteral() string {
 	return vn.Token.Literal()
 }
@@ -44,6 +52,25 @@ func (p Program) TokenLiteral() string {
 	}
 
 	return ""
+}
+
+type TokenValuer[T any] interface {
+	SetValue(value T)
+	SetToken(token tokens.Token)
+}
+
+func NewValueNode[T any, V any, PT interface {
+	TokenValuer[V]
+	*T
+}](token tokens.Token, values ...V) *T {
+	result := PT(new(T))
+	result.SetToken(token)
+
+	if len(values) > 0 {
+		result.SetValue(values[0])
+	}
+
+	return result
 }
 
 func (p Program) String() string {

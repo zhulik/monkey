@@ -136,20 +136,14 @@ func (p *Parser) parseStatement() (ast.Statement, error) {
 }
 
 func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
-	stmt := &ast.LetStatement{
-		StatementNode: ast.StatementNode[ast.Expression]{
-			ValueNode: ast.ValueNode[ast.Expression]{Token: p.currentToken},
-		},
-	} // TODO: fix
+	stmt := ast.NewValueNode[ast.LetStatement, ast.Expression](p.currentToken)
 
 	err := p.expectPeek(tokens.IDENTIFIER)
 	if err != nil {
 		return nil, err
 	}
 
-	identifier := &ast.IdentifierExpression{}
-	identifier.Token = p.currentToken
-	identifier.V = p.currentToken.Literal()
+	identifier := ast.NewValueNode[ast.IdentifierExpression](p.currentToken, p.currentToken.Literal())
 
 	stmt.Name = identifier
 
@@ -185,11 +179,7 @@ func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
 }
 
 func (p *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
-	stmt := &ast.ReturnStatement{ // TODO: fix
-		StatementNode: ast.StatementNode[ast.Expression]{
-			ValueNode: ast.ValueNode[ast.Expression]{Token: p.currentToken},
-		},
-	}
+	stmt := ast.NewValueNode[ast.ReturnStatement, ast.Expression](p.currentToken)
 
 	err := p.nextToken()
 	if err != nil {
@@ -218,11 +208,7 @@ func (p *Parser) parseReturnStatement() (*ast.ReturnStatement, error) {
 }
 
 func (p *Parser) parseExpressionStatement() (*ast.ExpressionStatement, error) {
-	stmt := &ast.ExpressionStatement{ // TODO: fix
-		StatementNode: ast.StatementNode[ast.Expression]{
-			ValueNode: ast.ValueNode[ast.Expression]{Token: p.currentToken},
-		},
-	}
+	stmt := ast.NewValueNode[ast.ExpressionStatement, ast.Expression](p.currentToken)
 
 	expression, err := p.parseExpression(LOWEST)
 	if err != nil {
@@ -287,17 +273,11 @@ func (p *Parser) parseExpression(prec int) (ast.Expression, error) {
 }
 
 func (p *Parser) parseIdentifierExpression() (ast.Expression, error) {
-	identifier := &ast.IdentifierExpression{}
-	identifier.Token = p.currentToken
-	identifier.V = p.currentToken.Literal()
-
-	return identifier, nil
+	return ast.NewValueNode[ast.IdentifierExpression](p.currentToken, p.currentToken.Literal()), nil
 }
 
 func (p *Parser) parseIntegerExpression() (ast.Expression, error) {
-	expr := &ast.IntegerExpression{ExpressionNode: ast.ExpressionNode[int64]{ValueNode: ast.ValueNode[int64]{
-		Token: p.currentToken,
-	}}}
+	expr := ast.NewValueNode[ast.IntegerExpression, int64](p.currentToken)
 
 	value, err := strconv.ParseInt(p.currentToken.Literal(), 10, 64)
 	if err != nil {
@@ -310,12 +290,8 @@ func (p *Parser) parseIntegerExpression() (ast.Expression, error) {
 }
 
 func (p *Parser) parsePrefixExpression() (ast.Expression, error) {
-	expr := &ast.PrefixExpression{
-		ExpressionNode: ast.ExpressionNode[ast.Expression]{ValueNode: ast.ValueNode[ast.Expression]{
-			Token: p.currentToken,
-		}},
-		Operator: p.currentToken.Literal(),
-	}
+	expr := ast.NewValueNode[ast.PrefixExpression, ast.Expression](p.currentToken)
+	expr.Operator = p.currentToken.Literal()
 
 	err := p.nextToken()
 	if err != nil {
@@ -335,11 +311,7 @@ func (p *Parser) parsePrefixExpression() (ast.Expression, error) {
 }
 
 func (p *Parser) parseBooleanExpression() (ast.Expression, error) {
-	b := &ast.BooleanExpression{}
-	b.Token = p.currentToken
-	b.V = p.currentToken.Type == tokens.TRUE
-
-	return b, nil
+	return ast.NewValueNode[ast.BooleanExpression](p.currentToken, p.currentToken.Type == tokens.TRUE), nil
 }
 
 func (p *Parser) parseGroupedExpression() (ast.Expression, error) {
@@ -366,11 +338,7 @@ func (p *Parser) parseGroupedExpression() (ast.Expression, error) {
 }
 
 func (p *Parser) parseIfExpression() (ast.Expression, error) { //nolint:cyclop
-	expr := ast.IfExpression{
-		ExpressionNode: ast.ExpressionNode[ast.Expression]{
-			ValueNode: ast.ValueNode[ast.Expression]{Token: p.currentToken},
-		},
-	}
+	expr := ast.NewValueNode[ast.IfExpression, ast.Expression](p.currentToken)
 
 	err := p.expectPeek(tokens.LPAREN)
 	if err != nil {
@@ -429,11 +397,7 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) { //nolint:cyclop
 }
 
 func (p *Parser) parseBlockStatement() (*ast.BlockStatement, error) {
-	block := &ast.BlockStatement{ // TODO: fix
-		StatementNode: ast.StatementNode[[]ast.Statement]{
-			ValueNode: ast.ValueNode[[]ast.Statement]{Token: p.currentToken},
-		},
-	}
+	block := ast.NewValueNode[ast.BlockStatement, []ast.Statement](p.currentToken)
 
 	err := p.nextToken()
 	if err != nil {
@@ -466,15 +430,8 @@ func (p *Parser) parseBlockStatement() (*ast.BlockStatement, error) {
 }
 
 func (p *Parser) parseInfixExpression(left ast.Expression) (ast.Expression, error) {
-	expr := &ast.InfixExpression{
-		ExpressionNode: ast.ExpressionNode[ast.Expression]{
-			ValueNode: ast.ValueNode[ast.Expression]{
-				Token: p.currentToken,
-				V:     left,
-			},
-		},
-		Operator: p.currentToken.Literal(),
-	}
+	expr := ast.NewValueNode[ast.InfixExpression](p.currentToken, left)
+	expr.Operator = p.currentToken.Literal()
 
 	precedence := precedence(p.currentToken)
 
@@ -496,11 +453,7 @@ func (p *Parser) parseInfixExpression(left ast.Expression) (ast.Expression, erro
 }
 
 func (p *Parser) parseCallExpression(function ast.Expression) (ast.Expression, error) {
-	expr := &ast.CallExpression{ExpressionNode: ast.ExpressionNode[ast.Expression]{
-		ValueNode: ast.ValueNode[ast.Expression]{
-			Token: p.currentToken, V: function,
-		},
-	}}
+	expr := ast.NewValueNode[ast.CallExpression](p.currentToken, function)
 
 	args, err := p.parseCallArguments()
 	if err != nil {
@@ -572,11 +525,7 @@ func (p *Parser) parseCallArguments() ([]ast.Expression, error) { //nolint:cyclo
 }
 
 func (p *Parser) parseFunctionExpression() (ast.Expression, error) {
-	expr := ast.FunctionExpression{
-		ExpressionNode: ast.ExpressionNode[*ast.BlockStatement]{ValueNode: ast.ValueNode[*ast.BlockStatement]{
-			Token: p.currentToken,
-		}},
-	}
+	expr := ast.NewValueNode[ast.FunctionExpression, *ast.BlockStatement](p.currentToken)
 
 	err := p.expectPeek(tokens.LPAREN)
 	if err != nil {
@@ -622,9 +571,7 @@ func (p *Parser) parseFunctionParameters() ([]*ast.IdentifierExpression, error) 
 		return nil, err
 	}
 
-	identifier := &ast.IdentifierExpression{}
-	identifier.Token = p.currentToken
-	identifier.V = p.currentToken.Literal()
+	identifier := ast.NewValueNode[ast.IdentifierExpression](p.currentToken, p.currentToken.Literal())
 
 	params = append(params, identifier)
 
@@ -639,9 +586,7 @@ func (p *Parser) parseFunctionParameters() ([]*ast.IdentifierExpression, error) 
 			return nil, err
 		}
 
-		identifier = &ast.IdentifierExpression{}
-		identifier.Token = p.currentToken
-		identifier.V = p.currentToken.Literal()
+		identifier = ast.NewValueNode[ast.IdentifierExpression](p.currentToken, p.currentToken.Literal())
 
 		params = append(params, identifier)
 	}
