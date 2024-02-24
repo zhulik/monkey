@@ -6,37 +6,24 @@ import (
 	"strings"
 
 	"github.com/samber/lo"
-	"github.com/zhulik/monkey/tokens"
 )
 
 type ExpressionNode[T any] struct {
 	ValueNode[T]
 }
 
-func (sn StatementNode[T]) expressionNode() {}
+func (sn ExpressionNode[T]) expressionNode() {}
 
 type IdentifierExpression struct {
-	tokens.Token
-	Value string
-}
-
-func (i IdentifierExpression) expressionNode() {}
-func (i IdentifierExpression) TokenLiteral() string {
-	return i.Token.Literal()
+	ExpressionNode[string]
 }
 
 func (i IdentifierExpression) String() string {
-	return i.Value
+	return i.Value()
 }
 
 type IntegerExpression struct {
-	tokens.Token
-	Value int64
-}
-
-func (i IntegerExpression) expressionNode() {}
-func (i IntegerExpression) TokenLiteral() string {
-	return i.Token.Literal()
+	ExpressionNode[int64]
 }
 
 func (i IntegerExpression) String() string {
@@ -44,44 +31,26 @@ func (i IntegerExpression) String() string {
 }
 
 type PrefixExpression struct {
-	tokens.Token
+	ExpressionNode[Expression]
 	Operator string
-	Value    Expression
-}
-
-func (p PrefixExpression) expressionNode() {}
-func (p PrefixExpression) TokenLiteral() string {
-	return p.Token.Literal()
 }
 
 func (p PrefixExpression) String() string {
-	return fmt.Sprintf("(%s%s)", p.Operator, p.Value.String())
+	return fmt.Sprintf("(%s%s)", p.Operator, p.Value().String())
 }
 
 type InfixExpression struct {
-	tokens.Token
-	Left     Expression
-	Operator string
-	Right    Expression
-}
-
-func (p InfixExpression) expressionNode() {}
-func (p InfixExpression) TokenLiteral() string {
-	return p.Token.Literal()
+	ExpressionNode[Expression] // Value is the left expression
+	Operator                   string
+	Right                      Expression
 }
 
 func (p InfixExpression) String() string {
-	return fmt.Sprintf("(%s %s %s)", p.Left.String(), p.Operator, p.Right.String())
+	return fmt.Sprintf("(%s %s %s)", p.Value().String(), p.Operator, p.Right.String())
 }
 
 type BooleanExpression struct {
-	tokens.Token
-	Value bool
-}
-
-func (p BooleanExpression) expressionNode() {}
-func (p BooleanExpression) TokenLiteral() string {
-	return p.Token.Literal()
+	ExpressionNode[bool]
 }
 
 func (p BooleanExpression) String() string {
@@ -89,22 +58,16 @@ func (p BooleanExpression) String() string {
 }
 
 type IfExpression struct {
-	tokens.Token
-	Condition Expression
-	Then      *BlockStatement
-	Else      *BlockStatement
-}
-
-func (p IfExpression) expressionNode() {}
-func (p IfExpression) TokenLiteral() string {
-	return p.Token.Literal()
+	ExpressionNode[Expression] // Value is the condition expression
+	Then                       *BlockStatement
+	Else                       *BlockStatement
 }
 
 func (p IfExpression) String() string {
 	var out bytes.Buffer
 
 	out.WriteString("if ")
-	out.WriteString(p.Condition.String())
+	out.WriteString(p.Value().String())
 
 	thenBody := p.Then.String()
 
@@ -128,14 +91,8 @@ func (p IfExpression) String() string {
 }
 
 type FunctionExpression struct {
-	tokens.Token
-	Parameters []*IdentifierExpression
-	Body       *BlockStatement
-}
-
-func (p FunctionExpression) expressionNode() {}
-func (p FunctionExpression) TokenLiteral() string {
-	return p.Token.Literal()
+	ExpressionNode[*BlockStatement] // Value is the block
+	Parameters                      []*IdentifierExpression
 }
 
 func (p FunctionExpression) String() string {
@@ -146,10 +103,10 @@ func (p FunctionExpression) String() string {
 	})
 
 	out.WriteString(p.TokenLiteral() + "(" + strings.Join(params, ", ") + ")")
-	body := p.Body.String()
+	body := p.Value().String()
 
 	if len(body) > 0 {
-		out.WriteString(" { " + p.Body.String() + " }")
+		out.WriteString(" { " + p.Value().String() + " }")
 	} else {
 		out.WriteString(" { }")
 	}
@@ -158,14 +115,8 @@ func (p FunctionExpression) String() string {
 }
 
 type CallExpression struct {
-	tokens.Token
-	Function  Expression // FunctionExpression or IdentifierExpression
-	Arguments []Expression
-}
-
-func (p CallExpression) expressionNode() {}
-func (p CallExpression) TokenLiteral() string {
-	return p.Token.Literal()
+	ExpressionNode[Expression] // Value is the FunctionExpression or IdentifierExpression
+	Arguments                  []Expression
 }
 
 func (p CallExpression) String() string {
@@ -175,7 +126,7 @@ func (p CallExpression) String() string {
 		return item.String()
 	})
 
-	out.WriteString(p.Function.String() + "(")
+	out.WriteString(p.Value().String() + "(")
 
 	out.WriteString(strings.Join(args, ", "))
 	out.WriteString(")")
