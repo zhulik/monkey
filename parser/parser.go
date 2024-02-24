@@ -147,9 +147,11 @@ func (p *Parser) parseLetStatement() (*ast.LetStatement, error) {
 		return nil, err
 	}
 
-	stmt.Name = &ast.IdentifierExpression{ExpressionNode: ast.ExpressionNode[string]{ValueNode: ast.ValueNode[string]{
-		Token: p.currentToken, V: p.currentToken.Literal(),
-	}}}
+	identifier := &ast.IdentifierExpression{}
+	identifier.Token = p.currentToken
+	identifier.V = p.currentToken.Literal()
+
+	stmt.Name = identifier
 
 	err = p.expectPeek(tokens.ASSIGN)
 	if err != nil {
@@ -285,9 +287,11 @@ func (p *Parser) parseExpression(prec int) (ast.Expression, error) {
 }
 
 func (p *Parser) parseIdentifierExpression() (ast.Expression, error) {
-	return &ast.IdentifierExpression{ExpressionNode: ast.ExpressionNode[string]{ValueNode: ast.ValueNode[string]{
-		Token: p.currentToken, V: p.currentToken.Literal(),
-	}}}, nil
+	identifier := &ast.IdentifierExpression{}
+	identifier.Token = p.currentToken
+	identifier.V = p.currentToken.Literal()
+
+	return identifier, nil
 }
 
 func (p *Parser) parseIntegerExpression() (ast.Expression, error) {
@@ -331,9 +335,11 @@ func (p *Parser) parsePrefixExpression() (ast.Expression, error) {
 }
 
 func (p *Parser) parseBooleanExpression() (ast.Expression, error) {
-	return ast.BooleanExpression{ExpressionNode: ast.ExpressionNode[bool]{ValueNode: ast.ValueNode[bool]{
-		Token: p.currentToken, V: p.currentToken.Type == tokens.TRUE,
-	}}}, nil
+	b := &ast.BooleanExpression{}
+	b.Token = p.currentToken
+	b.V = p.currentToken.Type == tokens.TRUE
+
+	return b, nil
 }
 
 func (p *Parser) parseGroupedExpression() (ast.Expression, error) {
@@ -616,9 +622,10 @@ func (p *Parser) parseFunctionParameters() ([]*ast.IdentifierExpression, error) 
 		return nil, err
 	}
 
-	identifier := &ast.IdentifierExpression{ExpressionNode: ast.ExpressionNode[string]{ValueNode: ast.ValueNode[string]{
-		Token: p.currentToken, V: p.currentToken.Literal(),
-	}}}
+	identifier := &ast.IdentifierExpression{}
+	identifier.Token = p.currentToken
+	identifier.V = p.currentToken.Literal()
+
 	params = append(params, identifier)
 
 	for p.peekToken.Type == tokens.COMMA {
@@ -632,9 +639,10 @@ func (p *Parser) parseFunctionParameters() ([]*ast.IdentifierExpression, error) 
 			return nil, err
 		}
 
-		identifier = &ast.IdentifierExpression{ExpressionNode: ast.ExpressionNode[string]{ValueNode: ast.ValueNode[string]{
-			Token: p.currentToken, V: p.currentToken.Literal(),
-		}}}
+		identifier = &ast.IdentifierExpression{}
+		identifier.Token = p.currentToken
+		identifier.V = p.currentToken.Literal()
+
 		params = append(params, identifier)
 	}
 
