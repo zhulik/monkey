@@ -13,7 +13,7 @@ import (
 
 var (
 	ErrInvalidToken        = errors.New("invalid token")
-	ErrNoPrefixParserFound = errors.New("no prefix parse function  found for")
+	ErrNoPrefixParserFound = errors.New("no prefix parse function found for")
 
 	precedences = map[tokens.TokenType]int{ //nolint:gochecknoglobals
 		tokens.EQ:       EQUALS,
@@ -63,6 +63,8 @@ func New(l *lexer.Lexer) (*Parser, error) {
 		tokens.INTEGER:    parser.parseIntegerExpression,
 		tokens.BANG:       parser.parsePrefixExpression,
 		tokens.MINUS:      parser.parsePrefixExpression,
+		tokens.TRUE:       parser.parseBooleanExpression,
+		tokens.FALSE:      parser.parseBooleanExpression,
 	}
 	parser.infixParseFns = map[tokens.TokenType]infixParseFn{
 		tokens.PLUS:     parser.parseInfixExpression,
@@ -276,6 +278,10 @@ func (p *Parser) parsePrefixExpression() (ast.Expression, error) {
 	expr.Right = right
 
 	return expr, nil
+}
+
+func (p *Parser) parseBooleanExpression() (ast.Expression, error) {
+	return ast.BooleanExpression{Token: p.currentToken, Value: p.currentToken.Type == tokens.TRUE}, nil
 }
 
 func (p *Parser) parseInfixExpression(left ast.Expression) (ast.Expression, error) {

@@ -170,3 +170,17 @@ func (p InfixExpression) TokenLiteral() string {
 func (p InfixExpression) String() string {
 	return fmt.Sprintf("(%s %s %s)", p.Left.String(), p.Operator, p.Right.String())
 }
+
+type BooleanExpression struct {
+	Token tokens.Token
+	Value bool
+}
+
+func (p BooleanExpression) expressionNode() {}
+func (p BooleanExpression) TokenLiteral() string {
+	return p.Token.Literal()
+}
+
+func (p BooleanExpression) String() string {
+	return p.Token.Literal()
+}

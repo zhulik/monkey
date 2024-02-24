@@ -167,6 +167,31 @@ var _ = Describe("Parser", func() {
 			})
 		})
 
+		Context("when parsing boolean expressions", func() {
+			Context("when expression is valid", func() {
+				cases := map[string]string{
+					"true;":          "true",
+					"false;":         "false",
+					"2 > 3 == false": "((2 > 3) == false)",
+				}
+
+				for input, output := range cases {
+					Context("when parsing"+input, func() {
+						It("returns parsed expression", func() {
+							program, err := parseProgram(input)
+							Expect(err).ToNot(HaveOccurred())
+
+							Expect(program.String()).To(Equal(output))
+						})
+					})
+				}
+			})
+
+			Context("when expression is invalid", func() {
+				// TODO: write me
+			})
+		})
+
 		Context("when parsing prefix expressions", func() {
 			Context("when expression is valid", func() {
 				cases := []struct {
