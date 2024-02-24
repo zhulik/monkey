@@ -115,7 +115,7 @@ var _ = Describe("Parser", func() {
 
 		Context("when parsing identifier expressions", func() {
 			Context("when expression is valid", func() {
-				input := "foobar;"
+				input := "foobar"
 
 				It("returns parsed expression", func() {
 					program, err := parseProgram(input)
@@ -142,7 +142,7 @@ var _ = Describe("Parser", func() {
 
 		Context("when parsing integer expressions", func() {
 			Context("when expression is valid", func() {
-				input := "12345;"
+				input := "12345"
 
 				It("returns parsed expression", func() {
 					program, err := parseProgram(input)
@@ -170,8 +170,8 @@ var _ = Describe("Parser", func() {
 		Context("when parsing boolean expressions", func() {
 			Context("when expression is valid", func() {
 				cases := map[string]string{
-					"true;":          "true",
-					"false;":         "false",
+					"true":           "true",
+					"false":          "false",
 					"2 > 3 == false": "((2 > 3) == false)",
 				}
 

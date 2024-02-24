@@ -84,9 +84,12 @@ func New(l *lexer.Lexer) (*Parser, error) {
 		return nil, err
 	}
 
+	// It's possible the have only one token in the program.
 	err = parser.nextToken()
 	if err != nil {
-		return nil, err
+		if !errors.Is(err, io.EOF) {
+			return nil, err
+		}
 	}
 
 	return parser, nil
