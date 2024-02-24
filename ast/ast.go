@@ -275,3 +275,29 @@ func (p FunctionExpression) String() string {
 
 	return out.String()
 }
+
+type CallExpression struct {
+	Token     tokens.Token
+	Function  Expression // FunctionExpression or IdentifierExpression
+	Arguments []Expression
+}
+
+func (p CallExpression) expressionNode() {}
+func (p CallExpression) TokenLiteral() string {
+	return p.Token.Literal()
+}
+
+func (p CallExpression) String() string {
+	var out bytes.Buffer
+
+	args := lo.Map(p.Arguments, func(item Expression, _ int) string {
+		return item.String()
+	})
+
+	out.WriteString(p.Function.String() + "(")
+
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
+
+	return out.String()
+}

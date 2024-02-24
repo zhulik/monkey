@@ -307,6 +307,10 @@ var _ = Describe("Parser", func() {
 							"2 / (5 + 5)":                "(2 / (5 + 5))",
 							"-(5 + 5)":                   "(-(5 + 5))",
 							"!(true == true)":            "(!(true == true))",
+
+							"a + add(b * c) + d":                        "((a + add((b * c))) + d)",
+							"add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8))": "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)))",
+							"add(a + b + c * d / f + g)":                "add((((a + b) + ((c * d) / f)) + g))",
 						}
 
 						tableTests(cases)
@@ -340,6 +344,21 @@ var _ = Describe("Parser", func() {
 							"fn(x, y) { x + y }": "fn(x, y) { (x + y) }",
 							"fn() { 1 }":         "fn() { 1 }",
 							"fn(x, y, z) { }":    "fn(x, y, z) { }",
+						}
+
+						tableTests(cases)
+					})
+
+					Context("when expression is invalid", func() {
+						// TODO: write me
+					})
+				})
+
+				Context("when parsing function calls", func() {
+					Context("when expressions are valid", func() {
+						cases := map[string]string{
+							"foo()":        "foo()",
+							"foo(1, 2, 3)": "foo(1, 2, 3)",
 						}
 
 						tableTests(cases)

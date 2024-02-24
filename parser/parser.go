@@ -26,6 +26,7 @@ var (
 		tokens.MINUS:    SUM,
 		tokens.SLASH:    PRODUCT,
 		tokens.ASTERISK: PRODUCT,
+		tokens.LPAREN:   CALL,
 	}
 )
 
@@ -80,6 +81,7 @@ func New(l *lexer.Lexer) (*Parser, error) {
 		tokens.GT:       parser.parseInfixExpression,
 		tokens.LTE:      parser.parseInfixExpression,
 		tokens.GTE:      parser.parseInfixExpression,
+		tokens.LPAREN:   parser.parseCallExpression,
 	}
 
 	err := parser.nextToken()
@@ -237,7 +239,7 @@ func (p *Parser) parseExpression(precedence int) (ast.Expression, error) {
 		var lErr error
 
 		leftExpr, lErr = infix(leftExpr)
-		if err != nil {
+		if lErr != nil {
 			if errors.Is(lErr, io.EOF) {
 				return leftExpr, nil
 			}
@@ -435,6 +437,102 @@ func (p *Parser) parseInfixExpression(left ast.Expression) (ast.Expression, erro
 	expr.Right = right
 
 	return expr, nil
+}
+
+func (p *Parser) parseCallExpression(function ast.Expression) (ast.Expression, error) {
+	expr := &ast.CallExpression{Token: p.currentToken, Function: function}
+
+	args, err := p.parseCallArguments()
+	if err != nil {
+		if errors.Is(err, io.EOF) {
+			return expr, nil
+		}
+
+		return nil, err
+	}
+
+	expr.Arguments = args
+
+	return expr, nil
+}
+
+func (p *Parser) parseCallArguments() ([]ast.Expression, error) { //nolint:funlen,gocognit,cyclop
+	args := []ast.Expression{}
+
+	if p.peekToken.Type == tokens.RPAREN {
+		err := p.nextToken()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return args, nil
+			}
+
+			return nil, err
+		}
+
+		return args, nil
+	}
+
+	err := p.nextToken()
+	if err != nil {
+		if errors.Is(err, io.EOF) {
+			return args, nil
+		}
+
+		return nil, err
+	}
+
+	expr, err := p.parseExpression(LOWEST)
+	if err != nil {
+		if errors.Is(err, io.EOF) {
+			return args, nil
+		}
+
+		return nil, err
+	}
+
+	args = append(args, expr)
+
+	for p.peekToken.Type == tokens.COMMA {
+		err = p.nextToken()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return args, nil
+			}
+
+			return nil, err
+		}
+
+		err = p.nextToken()
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return args, nil
+			}
+
+			return nil, err
+		}
+
+		expr, err = p.parseExpression(LOWEST)
+		if err != nil {
+			if errors.Is(err, io.EOF) {
+				return args, nil
+			}
+
+			return nil, err
+		}
+
+		args = append(args, expr)
+	}
+
+	err = p.expectPeek(tokens.RPAREN)
+	if err != nil {
+		if errors.Is(err, io.EOF) {
+			return args, nil
+		}
+
+		return nil, err
+	}
+
+	return args, nil
 }
 
 func (p *Parser) parseFunctionExpression() (ast.Expression, error) {
