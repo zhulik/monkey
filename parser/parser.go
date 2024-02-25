@@ -202,12 +202,8 @@ func (p *Parser) parseExpressionStatement() (*ast.ExpressionStatement, error) {
 	}
 
 	if p.peekToken.Type == tokens.SEMICOLON {
-		nErr := p.nextToken()
+		nErr := p.nextTokenIgnoreEOF()
 		if nErr != nil {
-			if errors.Is(nErr, io.EOF) {
-				return stmt, nil
-			}
-
 			return nil, nErr
 		}
 	}
@@ -232,12 +228,8 @@ func (p *Parser) parseExpression(prec int) (ast.Expression, error) {
 			return leftExpr, nil
 		}
 
-		nErr := p.nextToken()
+		nErr := p.nextTokenIgnoreEOF()
 		if nErr != nil {
-			if errors.Is(nErr, io.EOF) {
-				return leftExpr, nil
-			}
-
 			return nil, nErr
 		}
 
@@ -382,12 +374,8 @@ func (p *Parser) parseBlockStatement() (*ast.BlockStatement, error) {
 
 		block.V = append(block.V, stmt)
 
-		nErr := p.nextToken()
+		nErr := p.nextTokenIgnoreEOF()
 		if nErr != nil {
-			if errors.Is(nErr, io.EOF) {
-				return block, nil
-			}
-
 			return nil, nErr
 		}
 	}
