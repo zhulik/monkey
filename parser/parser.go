@@ -56,7 +56,7 @@ type Parser struct {
 	infixParseFns  map[tokens.TokenType]infixParseFn
 }
 
-func New(l *lexer.Lexer) (*Parser, error) {
+func New(l *lexer.Lexer) *Parser {
 	parser := &Parser{lexer: l}
 
 	parser.prefixParseFns = map[tokens.TokenType]prefixParseFn{
@@ -84,39 +84,28 @@ func New(l *lexer.Lexer) (*Parser, error) {
 		tokens.LPAREN:   parser.parseCallExpression,
 	}
 
-	err := parser.nextToken()
-	if err != nil {
-		return nil, err
-	}
-
-	// It's possible the have only one token in the program.
-	err = parser.nextTokenIgnoreEOF()
-	if err != nil {
-		return nil, err
-	}
-
-	return parser, nil
+	return parser
 }
 
 func (p *Parser) ParseProgram() (*ast.Program, error) {
 	program := &ast.Program{}
 
-	for {
-		stmt, err := p.parseStatement()
+	nErr := p.nextToken()
+	if nErr != nil {
+		return nil, nErr
+	}
+
+	for err := p.nextTokenIgnoreEOF(); !errors.Is(err, io.EOF); err = p.nextToken() {
 		if err != nil {
 			return nil, err
+		}
+
+		stmt, sErr := p.parseStatement()
+		if sErr != nil {
+			return nil, sErr
 		}
 
 		program.Statements = append(program.Statements, stmt)
-
-		err = p.nextToken()
-		if err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-
-			return nil, err
-		}
 	}
 
 	return program, nil

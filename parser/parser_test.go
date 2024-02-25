@@ -84,8 +84,7 @@ var _ = Describe("Parser", func() {
 					It("returns parsed "+output, func() {
 						lex := lexer.New(input)
 
-						par, err := parser.New(lex)
-						Expect(err).ToNot(HaveOccurred())
+						par := parser.New(lex)
 
 						program, err := par.ParseProgram()
 						Expect(err).ToNot(HaveOccurred())
