@@ -294,7 +294,7 @@ func (p *Parser) parseGroupedExpression() (ast.Expression, error) {
 	return expr, nil
 }
 
-func (p *Parser) parseIfExpression() (ast.Expression, error) { //nolint:cyclop
+func (p *Parser) parseIfExpression() (ast.Expression, error) {
 	expr := ast.NewValueNode[ast.IfExpression, ast.Expression](p.currentToken)
 
 	err := p.expectPeek(tokens.LPAREN)
@@ -317,11 +317,6 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) { //nolint:cyclop
 		return nil, err
 	}
 
-	err = p.expectPeek(tokens.LBRACE)
-	if err != nil {
-		return nil, err
-	}
-
 	expr.Then, err = p.parseBlockStatement()
 	if err != nil {
 		return nil, err
@@ -329,11 +324,6 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) { //nolint:cyclop
 
 	if p.peekToken.Type == tokens.ELSE {
 		err = p.nextToken()
-		if err != nil {
-			return nil, err
-		}
-
-		err = p.expectPeek(tokens.LBRACE)
 		if err != nil {
 			return nil, err
 		}
@@ -350,7 +340,12 @@ func (p *Parser) parseIfExpression() (ast.Expression, error) { //nolint:cyclop
 func (p *Parser) parseBlockStatement() (*ast.BlockStatement, error) {
 	block := ast.NewValueNode[ast.BlockStatement, []ast.Statement](p.currentToken)
 
-	err := p.nextTokenIgnoreEOF()
+	err := p.expectPeek(tokens.LBRACE)
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.nextTokenIgnoreEOF()
 	if err != nil {
 		return nil, err
 	}
@@ -433,14 +428,7 @@ func (p *Parser) parseFunctionExpression() (ast.Expression, error) {
 		return nil, err
 	}
 
-	params, err := p.parseFunctionArguments()
-	if err != nil {
-		return nil, err
-	}
-
-	expr.Parameters = params
-
-	err = p.expectPeek(tokens.LBRACE)
+	expr.Parameters, err = p.parseFunctionArguments()
 	if err != nil {
 		return nil, err
 	}
