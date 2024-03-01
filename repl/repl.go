@@ -8,6 +8,7 @@ import (
 	"github.com/chzyer/readline"
 	"github.com/k0kubun/pp"
 	"github.com/zhulik/monkey/lexer"
+	"github.com/zhulik/monkey/parser"
 )
 
 func Start() error {
@@ -36,14 +37,15 @@ func Start() error {
 		// 	fmt.Printf("%+v\n", token)
 		// }
 
-		for token, lErr := lex.NextToken(); !errors.Is(lErr, io.EOF); token, lErr = lex.NextToken() {
-			if lErr != nil {
-				pp.Print("Lexing error: %w", lErr)
+		parser := parser.New(lex)
 
-				break
-			}
+		program, pErr := parser.ParseProgram()
+		if pErr != nil {
+			fmt.Printf("Parsing error: %s\n", pErr.Error())
 
-			pp.Printf("%+v\n", token)
+			continue
 		}
+
+		pp.Printf("%+v\n", program.String())
 	}
 }
