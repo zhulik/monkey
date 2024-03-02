@@ -1,4 +1,4 @@
-package main_test
+package object_test
 
 import (
 	"testing"
@@ -7,9 +7,9 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestMonkey(t *testing.T) {
+func TestObject(t *testing.T) {
 	t.Parallel()
 
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Monkey cmd Suite")
+	RunSpecs(t, "Object Suite")
 }

@@ -1,4 +1,4 @@
-package main_test
+package monkey_test
 
 import (
 	"testing"
@@ -11,5 +11,5 @@ func TestMonkey(t *testing.T) {
 	t.Parallel()
 
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Monkey cmd Suite")
+	RunSpecs(t, "Monkey Suite")
 }

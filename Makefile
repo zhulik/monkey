@@ -6,7 +6,7 @@ endif
 export GOEXPERIMENT=rangefunc
 
 
-.PHONY: test lint repl
+.PHONY: test lint repl lint-fix bench
 
 GOLANGCI_LINT_VERSION := $(shell cat .golangci-lint-version)
 
@@ -23,6 +23,9 @@ lint: bin/golangci-lint
 
 lint-fix: bin/golangci-lint
 	./bin/golangci-lint run --fix
+
+bench:
+	go test -bench=.  -benchtime=10s
 
 bin/golangci-lint: .golangci-lint-version
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- v$(GOLANGCI_LINT_VERSION)

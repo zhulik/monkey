@@ -21,6 +21,8 @@ var _ = Describe("Parser", func() {
 				"return bar;":     "return bar;",
 				"return bar + 5;": "return (bar + 5);",
 
+				"nil": "nil",
+
 				// Basic expressions.
 				"foobar":         "foobar",
 				"12345":          "12345",
@@ -41,7 +43,7 @@ var _ = Describe("Parser", func() {
 				"2 > 3 == false": "((2 > 3) == false)",
 
 				// Expressions and operator precedence.
-				"-a * b":                     "((-a) * b)", // TODO: remove colon
+				"-a * b":                     "((-a) * b)",
 				"!-a":                        "(!(-a))",
 				"a + b + c":                  "((a + b) + c)",
 				"a + b - c":                  "((a + b) - c)",

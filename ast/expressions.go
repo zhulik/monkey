@@ -92,13 +92,13 @@ func (p IfExpression) String() string {
 
 type FunctionExpression struct {
 	ExpressionNode[*BlockStatement] // Value is the block
-	Parameters                      []*IdentifierExpression
+	Arguments                       []*IdentifierExpression
 }
 
 func (p FunctionExpression) String() string {
 	var out bytes.Buffer
 
-	params := lo.Map(p.Parameters, func(item *IdentifierExpression, _ int) string {
+	params := lo.Map(p.Arguments, func(item *IdentifierExpression, _ int) string {
 		return item.String()
 	})
 
@@ -132,4 +132,12 @@ func (p CallExpression) String() string {
 	out.WriteString(")")
 
 	return out.String()
+}
+
+type NilExpression struct {
+	ExpressionNode[any] // Value is not used
+}
+
+func (p NilExpression) String() string {
+	return "nil"
 }

@@ -7,6 +7,8 @@ import (
 
 	"github.com/chzyer/readline"
 	"github.com/k0kubun/pp"
+	"github.com/zhulik/monkey/evaluator"
+	obj "github.com/zhulik/monkey/evaluator/object"
 	"github.com/zhulik/monkey/lexer"
 	"github.com/zhulik/monkey/parser"
 )
@@ -14,12 +16,16 @@ import (
 func Start() error {
 	pp.Printf("Monkey repl.\n")
 
+	eval := evaluator.New()
+
 	rln, err := readline.New(">> ")
 	if err != nil {
 		return fmt.Errorf("readline init error: %w", err)
 	}
 
 	defer rln.Close()
+
+	environment := obj.NewEnv()
 
 	for {
 		line, rErr := rln.Readline()
@@ -41,11 +47,18 @@ func Start() error {
 
 		program, pErr := parser.ParseProgram()
 		if pErr != nil {
-			fmt.Printf("Parsing error: %s\n", pErr.Error())
+			fmt.Printf("Parsing error: %s\n", pErr.Error()) //nolint:forbidigo
 
 			continue
 		}
 
-		pp.Printf("%+v\n", program.String())
+		result, eErr := eval.Eval(program, environment)
+		if eErr != nil {
+			fmt.Printf("Evaluation error: %s\n", eErr.Error()) //nolint:forbidigo
+
+			continue
+		}
+
+		pp.Println(result.Inspect())
 	}
 }
