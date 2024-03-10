@@ -38,6 +38,7 @@ const (
 	IF       TokenType = "if" //nolint:varnamelen
 	ELSE     TokenType = "else"
 	RETURN   TokenType = "return"
+	NIL      TokenType = "nil"
 )
 
 var keywords = map[TokenType]TokenType{ //nolint:gochecknoglobals
@@ -48,6 +49,7 @@ var keywords = map[TokenType]TokenType{ //nolint:gochecknoglobals
 	IF:       IF,
 	ELSE:     ELSE,
 	RETURN:   RETURN,
+	NIL:      NIL,
 }
 
 type Token struct {

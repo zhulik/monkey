@@ -1,4 +1,4 @@
-package main_test
+package evaluator_test
 
 import (
 	"testing"
@@ -7,9 +7,9 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestMonkey(t *testing.T) {
+func TestEvaluator(t *testing.T) {
 	t.Parallel()
 
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Monkey cmd Suite")
+	RunSpecs(t, "Evaluator Suite")
 }

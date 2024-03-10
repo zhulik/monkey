@@ -69,6 +69,7 @@ func New(l *lexer.Lexer) *Parser {
 		tokens.LPAREN:     parser.parseGroupedExpression,
 		tokens.IF:         parser.parseIfExpression,
 		tokens.FUNCTION:   parser.parseFunctionExpression,
+		tokens.NIL:        parser.parseNilExpression,
 	}
 	parser.infixParseFns = map[tokens.TokenType]infixParseFn{
 		tokens.PLUS:     parser.parseInfixExpression,
@@ -428,7 +429,7 @@ func (p *Parser) parseFunctionExpression() (ast.Expression, error) {
 		return nil, err
 	}
 
-	expr.Parameters, err = p.parseFunctionArguments()
+	expr.Arguments, err = p.parseFunctionArguments()
 	if err != nil {
 		return nil, err
 	}
@@ -439,6 +440,10 @@ func (p *Parser) parseFunctionExpression() (ast.Expression, error) {
 	}
 
 	return expr, nil
+}
+
+func (p *Parser) parseNilExpression() (ast.Expression, error) {
+	return ast.NewValueNode[ast.NilExpression, any](p.currentToken), nil
 }
 
 func (p *Parser) parseFunctionArguments() ([]*ast.IdentifierExpression, error) {

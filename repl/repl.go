@@ -7,11 +7,16 @@ import (
 
 	"github.com/chzyer/readline"
 	"github.com/k0kubun/pp"
+	"github.com/zhulik/monkey/evaluator"
+	obj "github.com/zhulik/monkey/evaluator/object"
 	"github.com/zhulik/monkey/lexer"
+	"github.com/zhulik/monkey/parser"
 )
 
 func Start() error {
 	pp.Printf("Monkey repl.\n")
+
+	eval := evaluator.New()
 
 	rln, err := readline.New(">> ")
 	if err != nil {
@@ -19,6 +24,8 @@ func Start() error {
 	}
 
 	defer rln.Close()
+
+	environment := obj.NewEnv()
 
 	for {
 		line, rErr := rln.Readline()
@@ -36,14 +43,22 @@ func Start() error {
 		// 	fmt.Printf("%+v\n", token)
 		// }
 
-		for token, lErr := lex.NextToken(); !errors.Is(lErr, io.EOF); token, lErr = lex.NextToken() {
-			if lErr != nil {
-				pp.Print("Lexing error: %w", lErr)
+		parser := parser.New(lex)
 
-				break
-			}
+		program, pErr := parser.ParseProgram()
+		if pErr != nil {
+			fmt.Printf("Parsing error: %s\n", pErr.Error()) //nolint:forbidigo
 
-			pp.Printf("%+v\n", token)
+			continue
 		}
+
+		result, eErr := eval.Eval(program, environment)
+		if eErr != nil {
+			fmt.Printf("Evaluation error: %s\n", eErr.Error()) //nolint:forbidigo
+
+			continue
+		}
+
+		pp.Println(result.Inspect())
 	}
 }
