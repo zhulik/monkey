@@ -218,7 +218,16 @@ func evalCallExpression(eval Evaluator, node *ast.CallExpression, env obj.EnvGet
 		args = append(args, val)
 	}
 
-	return function.(obj.Function).Call(args...) //nolint:forcetypeassert,wrapcheck
+	res, err := function.(obj.Function).Call(args...)
+	if err != nil {
+		return obj.NIL, err //nolint:wrapcheck
+	}
+
+	if ret, ok := res.(ReturnValue); ok {
+		return ret.Object, nil
+	}
+
+	return res, nil
 }
 
 func evalBlockStatement(eval Evaluator, node *ast.BlockStatement, env obj.EnvGetSetter) (obj.Object, error) {

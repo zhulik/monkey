@@ -63,15 +63,15 @@ var _ = Describe("Evaluator", func() {
 				"if (10 < 1) {  } else { 1 }":                      "1",
 				"if (10 > 1) { 10 } else { true + true }":          "10",
 
-				"let a = 10; let b = 10; b;":                              "10",
-				"let add = fn(a, b){ a + b; }":                            "fn(a, b) { (a + b) }",
-				"let add = fn(a, b){ a + b; }; add(2, 2)":                 "4",
-				"let i = 1; let add = fn(a){ a + i; }; add(2)":            "3",
-				"let apply = fn(a, b){ b(a) }; apply(2, fn(a) { a + 1 })": "3",
-				"let check = fn(a){ a == 10 }; check(10)":                 "true",
-				"let check = fn(a){ fn(b) { a == b } }; check(10)(10)":    "true",
-				"let a = fn() { 1 }; let b = fn() { a(); }; b()":          "1",
-				// "let fib = fn(n) { if (n < 2) { return n; } return fib(n - 1) + fib(n -  2); }; fib(2)": "2",
+				"let a = 10; let b = 10; b;":                                                            "10",
+				"let add = fn(a, b){ a + b; }":                                                          "fn(a, b) { (a + b) }",
+				"let add = fn(a, b){ a + b; }; add(2, 2)":                                               "4",
+				"let i = 1; let add = fn(a){ a + i; }; add(2)":                                          "3",
+				"let apply = fn(a, b){ b(a) }; apply(2, fn(a) { a + 1 })":                               "3",
+				"let check = fn(a){ a == 10 }; check(10)":                                               "true",
+				"let check = fn(a){ fn(b) { a == b } }; check(10)(10)":                                  "true",
+				"let a = fn() { 1 }; let b = fn() { a(); }; b()":                                        "1",
+				"let fib = fn(n) { if (n < 2) { return n; } return fib(n - 1) + fib(n -  2); }; fib(2)": "1",
 			}
 
 			for input, output := range cases {
