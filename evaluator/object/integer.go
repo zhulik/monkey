@@ -28,11 +28,15 @@ func (o Integer) OperatorPlus(other Object) (Object, error) {
 		return NIL, ErrWronArgumentType
 	}
 
-	return New[Integer](o.value + otherInt.value), nil
+	o.value += otherInt.value
+
+	return o, nil
 }
 
 func (o Integer) OperatorPrefixMinus() (Object, error) {
-	return New[Integer](-o.value), nil
+	o.value = -o.value
+
+	return o, nil
 }
 
 func (o Integer) OperatorMinus(other Object) (Object, error) {
@@ -41,7 +45,9 @@ func (o Integer) OperatorMinus(other Object) (Object, error) {
 		return NIL, ErrWronArgumentType
 	}
 
-	return New[Integer](o.value - otherInt.value), nil
+	o.value -= otherInt.value
+
+	return o, nil
 }
 
 func (o Integer) OperatorAsterisk(other Object) (Object, error) {
@@ -50,7 +56,9 @@ func (o Integer) OperatorAsterisk(other Object) (Object, error) {
 		return NIL, ErrWronArgumentType
 	}
 
-	return New[Integer](o.value * otherInt.value), nil
+	o.value *= otherInt.value
+
+	return o, nil
 }
 
 func (o Integer) OperatorSlash(other Object) (Object, error) {
@@ -63,7 +71,9 @@ func (o Integer) OperatorSlash(other Object) (Object, error) {
 		return Integer{}, ErrDevisionByZero
 	}
 
-	return New[Integer](o.value / otherInt.value), nil
+	o.value /= otherInt.value
+
+	return o, nil
 }
 
 func (o Integer) OperatorGT(other Object) (Object, error) {
