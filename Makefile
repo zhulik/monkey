@@ -39,4 +39,3 @@ cpu.svg: cpu.prof
 cpu.prof:
 	go test -cpuprofile cpu.prof -bench .
 	rm monkey.test
-	
