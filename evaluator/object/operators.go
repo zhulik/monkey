@@ -1,8 +1,12 @@
 package object
 
 import (
+	"errors"
+
 	"github.com/samber/lo"
 )
+
+var ErrUndefinedMethod = errors.New("method is not defined")
 
 // Comparison operators.
 type OperatorLT interface {
@@ -29,12 +33,16 @@ type OperatorNEQ interface {
 	OperatorNEQ(other Object) (Object, error)
 }
 
-// Prefix math operators.
+// Prefix operators.
 type OperatorPrefixMinus interface {
 	OperatorPrefixMinus() (Object, error)
 }
 
-// Infix math operators.
+type OperatorBang interface {
+	OperatorBang() (Object, error)
+}
+
+// Infix operators.
 type OperatorMinus interface {
 	OperatorMinus(other Object) (Object, error)
 }

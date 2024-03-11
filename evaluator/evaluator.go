@@ -9,8 +9,11 @@ import (
 )
 
 var (
-	ErrParsingError         = errors.New("parsing error")
-	ErrUnknownInfixOperator = errors.New("unknown infix operator")
+	ErrParsingError          = errors.New("parsing error")
+	ErrUnknownInfixOperator  = errors.New("unknown infix operator")
+	ErrUnknownPrefixOperator = errors.New("unknown prefix operator")
+
+	ErrNonBoolCondition = errors.New("condition must be a Boolean")
 )
 
 type ReturnValue struct {
@@ -18,6 +21,10 @@ type ReturnValue struct {
 }
 
 type Evaluator struct{}
+
+func New() Evaluator {
+	return Evaluator{}
+}
 
 func (e Evaluator) Eval(node ast.Node, envs ...obj.EnvGetSetter) (obj.Object, error) { //nolint:cyclop,funlen
 	var env obj.EnvGetSetter
@@ -29,7 +36,7 @@ func (e Evaluator) Eval(node ast.Node, envs ...obj.EnvGetSetter) (obj.Object, er
 
 	switch node := node.(type) {
 	case *ast.Program:
-		return evalProgram(e, node, env)
+		return e.evalProgram(node, env)
 
 	case *ast.ExpressionStatement:
 		return e.Eval(node.V, env)
@@ -48,52 +55,48 @@ func (e Evaluator) Eval(node ast.Node, envs ...obj.EnvGetSetter) (obj.Object, er
 		return obj.New[obj.Integer](node.V), nil
 
 	case *ast.PrefixExpression:
-		return evalPrefixExpression(e, node, env)
+		return e.evalPrefixExpression(node, env)
 
 	case *ast.InfixExpression:
-		return evalInfixExpression(e, node, env)
+		return e.evalInfixExpression(node, env)
 
 	case *ast.IfExpression:
-		return evalIfExpression(e, node, env)
+		return e.evalIfExpression(node, env)
 
 	case *ast.BlockStatement:
 		if node != nil && len(node.V) > 0 {
-			return evalBlockStatement(e, node, env)
+			return e.evalBlockStatement(node, env)
 		}
 
 		return obj.NIL, nil
 
 	case *ast.ReturnStatement:
-		return evalReturnStatement(e, node, env)
+		return e.evalReturnStatement(node, env)
 
 	case *ast.LetStatement:
-		return evalLetStatement(e, node, env)
+		return e.evalLetStatement(node, env)
 
 	case *ast.IdentifierExpression:
-		return evalIdentifierExpression(node, env)
+		return e.evalIdentifierExpression(node, env)
 
 	case *ast.FunctionExpression:
 		return obj.Function{Evaluator: e, Function: node, Env: env}, nil
 
 	case *ast.CallExpression:
-		return evalCallExpression(e, node, env)
+		return e.evalCallExpression(node, env)
 
 	default:
-		return nil, fmt.Errorf("%w: unknown node type: %s", ErrParsingError, obj.GetType(node))
+		return nil, fmt.Errorf("%w: unknown node type: %s", ErrParsingError, node.TokenLiteral())
 	}
 }
 
-func New() Evaluator {
-	return Evaluator{}
-}
-
-func evalProgram(eval Evaluator, node *ast.Program, env obj.EnvGetSetter) (obj.Object, error) {
+func (e Evaluator) evalProgram(node *ast.Program, env obj.EnvGetSetter) (obj.Object, error) {
 	var result obj.Object
 
 	var err error
 
 	for _, statement := range node.Statements {
-		result, err = eval.Eval(statement, env)
+		result, err = e.Eval(statement, env)
 		if err != nil {
 			return nil, err
 		}
@@ -106,32 +109,40 @@ func evalProgram(eval Evaluator, node *ast.Program, env obj.EnvGetSetter) (obj.O
 	return result, nil
 }
 
-func evalPrefixExpression(eval Evaluator, node *ast.PrefixExpression, env obj.EnvGetSetter) (obj.Object, error) {
-	value, err := eval.Eval(node.V, env)
+func (e Evaluator) evalPrefixExpression(node *ast.PrefixExpression, env obj.EnvGetSetter) (obj.Object, error) {
+	value, err := e.Eval(node.V, env)
 	if err != nil {
 		return nil, err
 	}
 
-	operator := node.Operator
-	if operator == "-" {
-		operator = "PrefixMinus"
-	}
+	switch node.Operator {
+	case "-":
+		op, cErr := obj.CastOperator[obj.OperatorPrefixMinus](value)
+		if cErr != nil {
+			return obj.NIL, cErr
+		}
 
-	result, err := obj.Send(value, "operator"+operator)
-	if err != nil {
-		return nil, fmt.Errorf("send error: %w", err)
-	}
+		return op.OperatorPrefixMinus() //nolint:wrapcheck
+	case "!":
+		op, cErr := obj.CastOperator[obj.OperatorBang](value)
+		if cErr != nil {
+			return obj.NIL, cErr
+		}
 
-	return result, nil
+		return op.OperatorBang() //nolint:wrapcheck
+
+	default:
+		return obj.NIL, fmt.Errorf("%w: %s", ErrUnknownPrefixOperator, node.Operator)
+	}
 }
 
-func evalInfixExpression(eval Evaluator, node *ast.InfixExpression, env obj.EnvGetSetter) (obj.Object, error) { //nolint:funlen,lll,cyclop
-	left, err := eval.Eval(node.V, env)
+func (e Evaluator) evalInfixExpression(node *ast.InfixExpression, env obj.EnvGetSetter) (obj.Object, error) { //nolint:funlen,lll,cyclop
+	left, err := e.Eval(node.V, env)
 	if err != nil {
 		return nil, err
 	}
 
-	right, err := eval.Eval(node.Right, env)
+	right, err := e.Eval(node.Right, env)
 	if err != nil {
 		return nil, err
 	}
@@ -222,26 +233,26 @@ func evalInfixExpression(eval Evaluator, node *ast.InfixExpression, env obj.EnvG
 	}
 }
 
-func evalIfExpression(eval Evaluator, node *ast.IfExpression, env obj.EnvGetSetter) (obj.Object, error) {
-	condition, err := eval.Eval(node.V, env)
+func (e Evaluator) evalIfExpression(node *ast.IfExpression, env obj.EnvGetSetter) (obj.Object, error) {
+	condition, err := e.Eval(node.V, env)
 	if err != nil {
 		return nil, err
 	}
 
 	cond, ok := condition.(obj.Boolean)
 	if !ok {
-		panic("condition must be bool")
+		return obj.NIL, fmt.Errorf("%w, given: %s", ErrNonBoolCondition, condition.TypeName())
 	}
 
 	if cond.Value() {
-		return eval.Eval(node.Then, env)
+		return e.Eval(node.Then, env)
 	}
 
-	return eval.Eval(node.Else, env)
+	return e.Eval(node.Else, env)
 }
 
-func evalReturnStatement(eval Evaluator, node *ast.ReturnStatement, env obj.EnvGetSetter) (obj.Object, error) {
-	value, err := eval.Eval(node.V, env)
+func (e Evaluator) evalReturnStatement(node *ast.ReturnStatement, env obj.EnvGetSetter) (obj.Object, error) {
+	value, err := e.Eval(node.V, env)
 	if err != nil {
 		return nil, err
 	}
@@ -249,8 +260,8 @@ func evalReturnStatement(eval Evaluator, node *ast.ReturnStatement, env obj.EnvG
 	return ReturnValue{value}, nil
 }
 
-func evalLetStatement(eval Evaluator, node *ast.LetStatement, env obj.EnvGetSetter) (obj.Object, error) {
-	value, err := eval.Eval(node.V, env)
+func (e Evaluator) evalLetStatement(node *ast.LetStatement, env obj.EnvGetSetter) (obj.Object, error) {
+	value, err := e.Eval(node.V, env)
 	if err != nil {
 		return nil, err
 	}
@@ -260,12 +271,12 @@ func evalLetStatement(eval Evaluator, node *ast.LetStatement, env obj.EnvGetSett
 	return value, nil
 }
 
-func evalIdentifierExpression(node *ast.IdentifierExpression, env obj.EnvGetSetter) (obj.Object, error) {
+func (e Evaluator) evalIdentifierExpression(node *ast.IdentifierExpression, env obj.EnvGetSetter) (obj.Object, error) {
 	return env.Get(node.V) //nolint:wrapcheck
 }
 
-func evalCallExpression(eval Evaluator, node *ast.CallExpression, env obj.EnvGetSetter) (obj.Object, error) {
-	function, err := eval.Eval(node.V, env)
+func (e Evaluator) evalCallExpression(node *ast.CallExpression, env obj.EnvGetSetter) (obj.Object, error) {
+	function, err := e.Eval(node.V, env)
 	if err != nil {
 		return nil, err
 	}
@@ -273,7 +284,7 @@ func evalCallExpression(eval Evaluator, node *ast.CallExpression, env obj.EnvGet
 	args := []obj.Object{}
 
 	for _, a := range node.Arguments {
-		val, eErr := eval.Eval(a, env)
+		val, eErr := e.Eval(a, env)
 		if eErr != nil {
 			return nil, eErr
 		}
@@ -293,13 +304,13 @@ func evalCallExpression(eval Evaluator, node *ast.CallExpression, env obj.EnvGet
 	return res, nil
 }
 
-func evalBlockStatement(eval Evaluator, node *ast.BlockStatement, env obj.EnvGetSetter) (obj.Object, error) {
+func (e Evaluator) evalBlockStatement(node *ast.BlockStatement, env obj.EnvGetSetter) (obj.Object, error) {
 	var result obj.Object
 
 	var err error
 
 	for _, statement := range node.V {
-		result, err = eval.Eval(statement, env)
+		result, err = e.Eval(statement, env)
 		if err != nil {
 			return nil, err
 		}
