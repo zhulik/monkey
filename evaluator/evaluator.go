@@ -125,7 +125,7 @@ func evalPrefixExpression(eval Evaluator, node *ast.PrefixExpression, env obj.En
 	return result, nil
 }
 
-func evalInfixExpression(eval Evaluator, node *ast.InfixExpression, env obj.EnvGetSetter) (obj.Object, error) { //nolint:funlen
+func evalInfixExpression(eval Evaluator, node *ast.InfixExpression, env obj.EnvGetSetter) (obj.Object, error) { //nolint:funlen,lll,cyclop
 	left, err := eval.Eval(node.V, env)
 	if err != nil {
 		return nil, err

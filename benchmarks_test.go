@@ -16,7 +16,7 @@ func random(n int) int {
 	return rand.Intn(n) //nolint:gosec
 }
 
-func fibNative(n int) int {
+func fibNative(n int) int { //nolint:unused
 	if n < 2 {
 		return n
 	}
