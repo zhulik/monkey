@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	ErrParsingError         = errors.New("parsing error")
-	ErrUnknownInfixOperator = errors.New("unknown infix operator")
+	ErrParsingError          = errors.New("parsing error")
+	ErrUnknownInfixOperator  = errors.New("unknown infix operator")
+	ErrUnknownPrefixOperator = errors.New("unknown prefix operator")
 )
 
 type ReturnValue struct {
@@ -112,17 +113,25 @@ func (e Evaluator) evalPrefixExpression(node *ast.PrefixExpression, env obj.EnvG
 		return nil, err
 	}
 
-	operator := node.Operator
-	if operator == "-" {
-		operator = "PrefixMinus"
-	}
+	switch node.Operator {
+	case "-":
+		op, cErr := obj.CastOperator[obj.OperatorPrefixMinus](value)
+		if cErr != nil {
+			return obj.NIL, cErr
+		}
 
-	result, err := obj.Send(value, "operator"+operator)
-	if err != nil {
-		return nil, fmt.Errorf("send error: %w", err)
-	}
+		return op.OperatorPrefixMinus() //nolint:wrapcheck
+	case "!":
+		op, cErr := obj.CastOperator[obj.OperatorBang](value)
+		if cErr != nil {
+			return obj.NIL, cErr
+		}
 
-	return result, nil
+		return op.OperatorBang() //nolint:wrapcheck
+
+	default:
+		return obj.NIL, fmt.Errorf("%w: %s", ErrUnknownPrefixOperator, node.Operator)
+	}
 }
 
 func (e Evaluator) evalInfixExpression(node *ast.InfixExpression, env obj.EnvGetSetter) (obj.Object, error) { //nolint:funlen,lll,cyclop
