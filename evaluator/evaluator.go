@@ -12,6 +12,8 @@ var (
 	ErrParsingError          = errors.New("parsing error")
 	ErrUnknownInfixOperator  = errors.New("unknown infix operator")
 	ErrUnknownPrefixOperator = errors.New("unknown prefix operator")
+
+	ErrNonBoolCondition = errors.New("condition must be a Boolean")
 )
 
 type ReturnValue struct {
@@ -84,7 +86,7 @@ func (e Evaluator) Eval(node ast.Node, envs ...obj.EnvGetSetter) (obj.Object, er
 		return e.evalCallExpression(node, env)
 
 	default:
-		return nil, fmt.Errorf("%w: unknown node type: %s", ErrParsingError, obj.GetType(node))
+		return nil, fmt.Errorf("%w: unknown node type: %s", ErrParsingError, node.TokenLiteral())
 	}
 }
 
@@ -239,7 +241,7 @@ func (e Evaluator) evalIfExpression(node *ast.IfExpression, env obj.EnvGetSetter
 
 	cond, ok := condition.(obj.Boolean)
 	if !ok {
-		panic("condition must be bool")
+		return obj.NIL, fmt.Errorf("%w, given: %s", ErrNonBoolCondition, condition.TypeName())
 	}
 
 	if cond.Value() {

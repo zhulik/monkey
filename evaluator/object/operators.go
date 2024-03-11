@@ -1,8 +1,12 @@
 package object
 
 import (
+	"errors"
+
 	"github.com/samber/lo"
 )
+
+var ErrUndefinedMethod = errors.New("method is not defined")
 
 // Comparison operators.
 type OperatorLT interface {
