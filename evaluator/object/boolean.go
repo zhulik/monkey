@@ -4,6 +4,14 @@ import (
 	"strconv"
 )
 
+func ToBoolean(b bool) Boolean {
+	if b {
+		return TRUE
+	}
+
+	return FALSE
+}
+
 type Boolean struct {
 	BaseObject[bool]
 }
@@ -30,7 +38,7 @@ func (o Boolean) OperatorEQ(other Object) (Object, error) {
 		return NIL, ErrWronArgumentType
 	}
 
-	return New[Boolean](o.value == otherBool.value), nil
+	return ToBoolean(o.value == otherBool.value), nil
 }
 
 func (o Boolean) OperatorNEQ(other Object) (Object, error) {
@@ -39,5 +47,5 @@ func (o Boolean) OperatorNEQ(other Object) (Object, error) {
 		return NIL, ErrWronArgumentType
 	}
 
-	return New[Boolean](o.value != otherBool.value), nil
+	return ToBoolean(o.value != otherBool.value), nil
 }

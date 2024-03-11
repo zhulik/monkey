@@ -72,7 +72,7 @@ func (o Integer) OperatorGT(other Object) (Object, error) {
 		return NIL, ErrWronArgumentType
 	}
 
-	return New[Boolean](o.value > otherInt.value), nil
+	return ToBoolean(o.value > otherInt.value), nil
 }
 
 func (o Integer) OperatorGTE(other Object) (Object, error) {
@@ -81,7 +81,7 @@ func (o Integer) OperatorGTE(other Object) (Object, error) {
 		return NIL, ErrWronArgumentType
 	}
 
-	return New[Boolean](o.value >= otherInt.value), nil
+	return ToBoolean(o.value >= otherInt.value), nil
 }
 
 func (o Integer) OperatorLT(other Object) (Object, error) {
@@ -90,7 +90,7 @@ func (o Integer) OperatorLT(other Object) (Object, error) {
 		return NIL, ErrWronArgumentType
 	}
 
-	return New[Boolean](o.value < otherInt.value), nil
+	return ToBoolean(o.value < otherInt.value), nil
 }
 
 func (o Integer) OperatorLTE(other Object) (Object, error) {
@@ -99,7 +99,7 @@ func (o Integer) OperatorLTE(other Object) (Object, error) {
 		return NIL, ErrWronArgumentType
 	}
 
-	return New[Boolean](o.value <= otherInt.value), nil
+	return ToBoolean(o.value <= otherInt.value), nil
 }
 
 func (o Integer) OperatorEQ(other Object) (Object, error) {
@@ -108,7 +108,7 @@ func (o Integer) OperatorEQ(other Object) (Object, error) {
 		return NIL, ErrWronArgumentType
 	}
 
-	return New[Boolean](o.value == otherInt.value), nil
+	return ToBoolean(o.value == otherInt.value), nil
 }
 
 func (o Integer) OperatorNEQ(other Object) (Object, error) {
@@ -117,5 +117,5 @@ func (o Integer) OperatorNEQ(other Object) (Object, error) {
 		return NIL, ErrWronArgumentType
 	}
 
-	return New[Boolean](o.value != otherInt.value), nil
+	return ToBoolean(o.value != otherInt.value), nil
 }
