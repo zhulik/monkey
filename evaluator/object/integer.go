@@ -22,50 +22,100 @@ func (o Integer) Inspect() string {
 	return strconv.FormatInt(o.value, 10)
 }
 
-func (o Integer) OperatorPlus(other Integer) (Integer, error) {
-	return New[Integer](o.value + other.value), nil
+func (o Integer) OperatorPlus(other Object) (Object, error) {
+	otherInt, ok := other.(Integer)
+	if !ok {
+		return NIL, ErrWronArgumentType
+	}
+
+	return New[Integer](o.value + otherInt.value), nil
 }
 
-func (o Integer) OperatorPrefixMinus() (Integer, error) {
+func (o Integer) OperatorPrefixMinus() (Object, error) {
 	return New[Integer](-o.value), nil
 }
 
-func (o Integer) OperatorMinus(other Integer) (Integer, error) {
-	return New[Integer](o.value - other.value), nil
+func (o Integer) OperatorMinus(other Object) (Object, error) {
+	otherInt, ok := other.(Integer)
+	if !ok {
+		return NIL, ErrWronArgumentType
+	}
+
+	return New[Integer](o.value - otherInt.value), nil
 }
 
-func (o Integer) OperatorAsterisk(other Integer) (Integer, error) {
-	return New[Integer](o.value * other.value), nil
+func (o Integer) OperatorAsterisk(other Object) (Object, error) {
+	otherInt, ok := other.(Integer)
+	if !ok {
+		return NIL, ErrWronArgumentType
+	}
+
+	return New[Integer](o.value * otherInt.value), nil
 }
 
-func (o Integer) OperatorSlash(other Integer) (Integer, error) {
-	if other.value == 0 {
+func (o Integer) OperatorSlash(other Object) (Object, error) {
+	otherInt, ok := other.(Integer)
+	if !ok {
+		return NIL, ErrWronArgumentType
+	}
+
+	if otherInt.value == 0 {
 		return Integer{}, ErrDevisionByZero
 	}
 
-	return New[Integer](o.value / other.value), nil
+	return New[Integer](o.value / otherInt.value), nil
 }
 
-func (o Integer) OperatorGT(other Integer) (Boolean, error) {
-	return New[Boolean](o.value > other.value), nil
+func (o Integer) OperatorGT(other Object) (Object, error) {
+	otherInt, ok := other.(Integer)
+	if !ok {
+		return NIL, ErrWronArgumentType
+	}
+
+	return New[Boolean](o.value > otherInt.value), nil
 }
 
-func (o Integer) OperatorGTE(other Integer) (Boolean, error) {
-	return New[Boolean](o.value >= other.value), nil
+func (o Integer) OperatorGTE(other Object) (Object, error) {
+	otherInt, ok := other.(Integer)
+	if !ok {
+		return NIL, ErrWronArgumentType
+	}
+
+	return New[Boolean](o.value >= otherInt.value), nil
 }
 
-func (o Integer) OperatorLT(other Integer) (Boolean, error) {
-	return New[Boolean](o.value < other.value), nil
+func (o Integer) OperatorLT(other Object) (Object, error) {
+	otherInt, ok := other.(Integer)
+	if !ok {
+		return NIL, ErrWronArgumentType
+	}
+
+	return New[Boolean](o.value < otherInt.value), nil
 }
 
-func (o Integer) OperatorLTE(other Integer) (Boolean, error) {
-	return New[Boolean](o.value <= other.value), nil
+func (o Integer) OperatorLTE(other Object) (Object, error) {
+	otherInt, ok := other.(Integer)
+	if !ok {
+		return NIL, ErrWronArgumentType
+	}
+
+	return New[Boolean](o.value <= otherInt.value), nil
 }
 
-func (o Integer) OperatorEQ(other Integer) (Boolean, error) {
-	return New[Boolean](o.value == other.value), nil
+func (o Integer) OperatorEQ(other Object) (Object, error) {
+	otherInt, ok := other.(Integer)
+	if !ok {
+		return NIL, ErrWronArgumentType
+	}
+
+	return New[Boolean](o.value == otherInt.value), nil
 }
 
-func (o Integer) OperatorNEQ(other Integer) (Boolean, error) {
-	return New[Boolean](o.value != other.value), nil
+func (o Integer) OperatorNEQ(other Object) (Object, error) {
+	otherInt, ok := other.(Integer)
+	if !ok {
+		return NIL, ErrWronArgumentType
+	}
+
+	return New[Boolean](o.value != otherInt.value), nil
 }

@@ -32,11 +32,11 @@ func fibScript(eval evaluator.Evaluator, env obj.EnvGetSetter, program *ast.Prog
 	return int(val.(obj.Integer).Value()) //nolint:forcetypeassert
 }
 
-func BenchmarkFibNative(b *testing.B) {
-	for n := 0; n < b.N; n++ {
-		fibNative(random(10))
-	}
-}
+// func BenchmarkFibNative(b *testing.B) {
+// 	for n := 0; n < b.N; n++ {
+// 		fibNative(random(10))
+// 	}
+// }
 
 func BenchmarkScript(b *testing.B) {
 	script := `

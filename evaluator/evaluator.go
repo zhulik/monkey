@@ -8,7 +8,10 @@ import (
 	obj "github.com/zhulik/monkey/evaluator/object"
 )
 
-var ErrParsingError = errors.New("parsing error")
+var (
+	ErrParsingError         = errors.New("parsing error")
+	ErrUnknownInfixOperator = errors.New("unknown infix operator")
+)
 
 type ReturnValue struct {
 	obj.Object
@@ -84,24 +87,6 @@ func New() Evaluator {
 	return Evaluator{}
 }
 
-// func evalStatements(e Evaluator, statements []ast.Statement, env obj.EnvGetSetter) (obj.Object, error) {
-// 	var result obj.Object
-
-// 	var err error
-// 	for _, stmt := range statements {
-// 		result, err = e.Eval(stmt, env)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-
-// 		if ret, ok := result.(ReturnValue); ok {
-// 			return ret.Object, nil
-// 		}
-// 	}
-
-// 	return result, nil
-// }
-
 func evalProgram(eval Evaluator, node *ast.Program, env obj.EnvGetSetter) (obj.Object, error) {
 	var result obj.Object
 
@@ -140,7 +125,7 @@ func evalPrefixExpression(eval Evaluator, node *ast.PrefixExpression, env obj.En
 	return result, nil
 }
 
-func evalInfixExpression(eval Evaluator, node *ast.InfixExpression, env obj.EnvGetSetter) (obj.Object, error) {
+func evalInfixExpression(eval Evaluator, node *ast.InfixExpression, env obj.EnvGetSetter) (obj.Object, error) { //nolint:funlen
 	left, err := eval.Eval(node.V, env)
 	if err != nil {
 		return nil, err
@@ -151,12 +136,74 @@ func evalInfixExpression(eval Evaluator, node *ast.InfixExpression, env obj.EnvG
 		return nil, err
 	}
 
-	result, err := obj.Send(left, "operator"+node.Operator, right)
-	if err != nil {
-		return nil, fmt.Errorf("send error: %w", err)
-	}
+	switch node.Operator {
+	case "<":
+		op, cErr := obj.CastOperator[obj.OperatorLT](left)
+		if cErr != nil {
+			return obj.NIL, cErr
+		}
 
-	return result, nil
+		return op.OperatorLT(right) //nolint:wrapcheck
+
+	case "<=":
+		op, cErr := obj.CastOperator[obj.OperatorLTE](left)
+		if cErr != nil {
+			return obj.NIL, cErr
+		}
+
+		return op.OperatorLTE(right) //nolint:wrapcheck
+
+	case ">":
+		op, cErr := obj.CastOperator[obj.OperatorGT](left)
+		if cErr != nil {
+			return obj.NIL, cErr
+		}
+
+		return op.OperatorGT(right) //nolint:wrapcheck
+
+	case ">=":
+		op, cErr := obj.CastOperator[obj.OperatorGTE](left)
+		if cErr != nil {
+			return obj.NIL, cErr
+		}
+
+		return op.OperatorGTE(right) //nolint:wrapcheck
+
+	case "-":
+		op, cErr := obj.CastOperator[obj.OperatorMinus](left)
+		if cErr != nil {
+			return obj.NIL, cErr
+		}
+
+		return op.OperatorMinus(right) //nolint:wrapcheck
+
+	case "+":
+		op, cErr := obj.CastOperator[obj.OperatorPlus](left)
+		if cErr != nil {
+			return obj.NIL, cErr
+		}
+
+		return op.OperatorPlus(right) //nolint:wrapcheck
+
+	case "*":
+		op, cErr := obj.CastOperator[obj.OperatorAsterisk](left)
+		if cErr != nil {
+			return obj.NIL, cErr
+		}
+
+		return op.OperatorAsterisk(right) //nolint:wrapcheck
+
+	case "/":
+		op, cErr := obj.CastOperator[obj.OperatorSlash](left)
+		if cErr != nil {
+			return obj.NIL, cErr
+		}
+
+		return op.OperatorSlash(right) //nolint:wrapcheck
+
+	default:
+		return obj.NIL, fmt.Errorf("%w: %s", ErrUnknownInfixOperator, node.Operator)
+	}
 }
 
 func evalIfExpression(eval Evaluator, node *ast.IfExpression, env obj.EnvGetSetter) (obj.Object, error) {
