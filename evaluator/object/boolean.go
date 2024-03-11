@@ -16,7 +16,7 @@ func (o Boolean) Inspect() string {
 	return strconv.FormatBool(o.value)
 }
 
-func (o Boolean) OperatorBang() (Boolean, error) {
+func (o Boolean) OperatorBang() (Object, error) {
 	if o.value {
 		return FALSE, nil
 	}
@@ -24,10 +24,20 @@ func (o Boolean) OperatorBang() (Boolean, error) {
 	return TRUE, nil
 }
 
-func (o Boolean) OperatorEQ(other Boolean) (Boolean, error) {
-	return New[Boolean](o.value == other.value), nil
+func (o Boolean) OperatorEQ(other Object) (Object, error) {
+	otherBool, ok := other.(Boolean)
+	if !ok {
+		return NIL, ErrWronArgumentType
+	}
+
+	return New[Boolean](o.value == otherBool.value), nil
 }
 
-func (o Boolean) OperatorNEQ(other Boolean) (Boolean, error) {
-	return New[Boolean](o.value != other.value), nil
+func (o Boolean) OperatorNEQ(other Object) (Object, error) {
+	otherBool, ok := other.(Boolean)
+	if !ok {
+		return NIL, ErrWronArgumentType
+	}
+
+	return New[Boolean](o.value != otherBool.value), nil
 }

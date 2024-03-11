@@ -201,6 +201,22 @@ func evalInfixExpression(eval Evaluator, node *ast.InfixExpression, env obj.EnvG
 
 		return op.OperatorSlash(right) //nolint:wrapcheck
 
+	case "==":
+		op, cErr := obj.CastOperator[obj.OperatorEQ](left)
+		if cErr != nil {
+			return obj.NIL, cErr
+		}
+
+		return op.OperatorEQ(right) //nolint:wrapcheck
+
+	case "!=":
+		op, cErr := obj.CastOperator[obj.OperatorNEQ](left)
+		if cErr != nil {
+			return obj.NIL, cErr
+		}
+
+		return op.OperatorNEQ(right) //nolint:wrapcheck
+
 	default:
 		return obj.NIL, fmt.Errorf("%w: %s", ErrUnknownInfixOperator, node.Operator)
 	}
