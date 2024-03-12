@@ -60,7 +60,10 @@ if (5 < 10) {
 10 == 10;
 10 != 9;
 10 >= 10;
-9 <= 10;`
+9 <= 10;
+"foo" + "bar";
+"foo bar";
+`
 			lex := lexer.New(input)
 
 			result := []tokens.Token{
@@ -163,6 +166,13 @@ if (5 < 10) {
 				tokens.New(tokens.INTEGER, "9"),
 				tokens.New(tokens.LTE),
 				tokens.New(tokens.INTEGER, "10"),
+				tokens.New(tokens.SEMICOLON),
+
+				tokens.New(tokens.STRING, "foo"),
+				tokens.New(tokens.PLUS),
+				tokens.New(tokens.STRING, "bar"),
+				tokens.New(tokens.SEMICOLON),
+				tokens.New(tokens.STRING, "foo bar"),
 				tokens.New(tokens.SEMICOLON),
 			}
 
