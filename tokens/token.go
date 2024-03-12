@@ -6,6 +6,7 @@ const (
 	// Can have literal.
 	IDENTIFIER TokenType = "IDENTIFIER"
 	INTEGER    TokenType = "INTEGER"
+	STRING     TokenType = "STRING"
 
 	// Literal is equal to the type itself.
 	ASSIGN   TokenType = "="

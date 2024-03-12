@@ -141,3 +141,11 @@ type NilExpression struct {
 func (p NilExpression) String() string {
 	return "nil"
 }
+
+type StringExpression struct {
+	ExpressionNode[string] // Value is not used
+}
+
+func (p StringExpression) String() string {
+	return fmt.Sprintf(`"%s"`, p.TokenLiteral())
+}

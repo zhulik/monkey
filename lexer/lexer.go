@@ -87,6 +87,14 @@ func (l *Lexer) NextToken() (tokens.Token, error) { //nolint:cyclop,funlen
 			tok = tokens.New(tokens.BANG)
 		}
 
+	case '"':
+		str, err := l.readString()
+		if err != nil {
+			return tokens.Token{}, err
+		}
+
+		tok = tokens.New(tokens.STRING, str)
+
 	case 0:
 		defer l.readChar()
 
@@ -121,6 +129,26 @@ func (l *Lexer) Tokens() ([]tokens.Token, error) {
 	}
 
 	return tkns, nil
+}
+
+func (l *Lexer) readString() (string, error) {
+	position := l.position + 1
+
+	for {
+		l.readChar()
+
+		// TODO: add support for escaping
+
+		if l.ch == '"' {
+			break
+		}
+
+		if l.ch == 0 {
+			return "", io.EOF
+		}
+	}
+
+	return l.input[position:l.position], nil
 }
 
 func (l *Lexer) identifierToken() tokens.Token {
