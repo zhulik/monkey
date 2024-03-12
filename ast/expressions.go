@@ -147,5 +147,5 @@ type StringExpression struct {
 }
 
 func (p StringExpression) String() string {
-	return fmt.Sprintf("\"%s\"", p.TokenLiteral())
+	return fmt.Sprintf(`"%s"`, p.TokenLiteral())
 }

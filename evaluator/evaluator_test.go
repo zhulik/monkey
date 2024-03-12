@@ -72,6 +72,9 @@ var _ = Describe("Evaluator", func() {
 				"let check = fn(a){ fn(b) { a == b } }; check(10)(10)":                                  "true",
 				"let a = fn() { 1 }; let b = fn() { a(); }; b()":                                        "1",
 				"let fib = fn(n) { if (n < 2) { return n; } return fib(n - 1) + fib(n -  2); }; fib(2)": "1",
+
+				`"foo bar"`:     `"foo bar"`,
+				`"foo" + "bar"`: `"foobar"`,
 			}
 
 			for input, output := range cases {

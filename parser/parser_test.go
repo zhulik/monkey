@@ -79,7 +79,7 @@ var _ = Describe("Parser", func() {
 				// Function calls.
 				"foo()":        "foo()",
 				"foo(1, 2, 3)": "foo(1, 2, 3)",
-				"\"foo bar\"":  "\"foo bar\"",
+				`"foo bar"`:    `"foo bar"`,
 			}
 
 			for input, output := range cases {

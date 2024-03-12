@@ -85,6 +85,9 @@ func (e Evaluator) Eval(node ast.Node, envs ...obj.EnvGetSetter) (obj.Object, er
 	case *ast.CallExpression:
 		return e.evalCallExpression(node, env)
 
+	case *ast.StringExpression:
+		return obj.New[obj.String](node.V), nil
+
 	default:
 		return nil, fmt.Errorf("%w: unknown node type: %s", ErrParsingError, node.TokenLiteral())
 	}
